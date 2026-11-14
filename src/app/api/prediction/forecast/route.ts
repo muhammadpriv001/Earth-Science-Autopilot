@@ -2,19 +2,24 @@
 // THE EARTH SCIENCE AUTOPILOT — SCIENTIFIC FORECASTING API ROUTE
 // ==============================================================================
 // Deterministic forecasting with out-of-sample backtesting, naive benchmark,
-// and 80% / 95% uncertainty prediction intervals.
+// and 80% / 95% uncertainty prediction intervals. When observations are not
+// supplied, they are fetched from a live measurement archive.
 // ==============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runScientificForecast } from '@/lib/science/forecasting';
-import { SAHEL_VEGETATION_BENCHMARK, LAHORE_TEMPERATURE_BENCHMARK } from '@/lib/providers/mock-datasets';
 import { getVariableById } from '@/lib/science/earth-variables';
+import {
+  getLiveDataset,
+  LiveDataUnavailableError,
+  normaliseVariableId,
+} from '@/lib/providers/live-earth-data';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const variableId = normaliseVariableId(body.variableId || 'air-temperature');
     const {
-      variableId = 'ndvi',
       region,
       observations,
       horizonMonths = 24,
@@ -28,17 +33,27 @@ export async function POST(req: NextRequest) {
       system: 'Vegetation & Biosphere',
     };
 
-    // Use passed observations, or fallback to appropriate high-fidelity benchmark
     let activeObs = observations;
     let targetRegion = region;
 
-    if (!activeObs || activeObs.length < 24) {
-      if (variableId === 'ndvi' || variableId === 'evi') {
-        activeObs = SAHEL_VEGETATION_BENCHMARK.observations;
-        targetRegion = targetRegion || SAHEL_VEGETATION_BENCHMARK.region;
-      } else {
-        activeObs = LAHORE_TEMPERATURE_BENCHMARK.observations;
-        targetRegion = targetRegion || LAHORE_TEMPERATURE_BENCHMARK.region;
+    if (!activeObs || activeObs.length < 6) {
+      try {
+        const dataset = await getLiveDataset({
+          variableId,
+          region,
+          startDate: body.startDate || '2000-01-01',
+          endDate: body.endDate || new Date().toISOString().slice(0, 10),
+        });
+        activeObs = dataset.observations;
+        targetRegion = dataset.region;
+      } catch (providerError: any) {
+        if (providerError instanceof LiveDataUnavailableError) {
+          return NextResponse.json(
+            { error: providerError.message, code: 'LIVE_DATA_UNAVAILABLE' },
+            { status: 422 }
+          );
+        }
+        throw providerError;
       }
     }
 
@@ -61,7 +76,10 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    return NextResponse.json(forecastResult);
+    return NextResponse.json({
+      forecast: forecastResult,
+      ...forecastResult,
+    });
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || 'Failed to compute scientific forecast' },
@@ -69,4 +87,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

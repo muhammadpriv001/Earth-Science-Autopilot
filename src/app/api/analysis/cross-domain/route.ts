@@ -1,24 +1,30 @@
 // ==============================================================================
 // THE EARTH SCIENCE AUTOPILOT — CROSS-DOMAIN DISCOVERY API ROUTE
 // ==============================================================================
+// Bivariate coupling is computed from live measurements for both variables.
+// No demonstration series are injected when a live source is unavailable.
+// ==============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runCrossDomainAnalysis } from '@/lib/science/cross-domain';
 import { getVariableById } from '@/lib/science/earth-variables';
 import {
-  SAHEL_VEGETATION_BENCHMARK,
-  SAHEL_PRECIPITATION_BENCHMARK,
-} from '@/lib/providers/mock-datasets';
+  getLiveDataset,
+  LiveDataUnavailableError,
+  normaliseVariableId,
+} from '@/lib/providers/live-earth-data';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
+    const variableIdA = normaliseVariableId(body.variableIdA || body.driverVariableId || 'precipitation');
+    const variableIdB = normaliseVariableId(body.variableIdB || body.responseVariableId || 'soil-moisture');
     const {
-      variableIdA = 'precipitation',
-      variableIdB = 'ndvi',
       region,
       seriesA,
       seriesB,
+      startDate = '2000-01-01',
+      endDate = new Date().toISOString().slice(0, 10),
     } = body;
 
     const varA = getVariableById(variableIdA) || {
@@ -51,15 +57,51 @@ export async function POST(req: NextRequest) {
       recommendedDatasets: [],
     };
 
-    const targetRegion = region || SAHEL_VEGETATION_BENCHMARK.region;
+    const targetRegion = region || {
+      name: 'Lahore, Punjab, Pakistan',
+      geometryType: 'point',
+      coordinates: [74.3587, 31.5204],
+      center: [74.3587, 31.5204],
+    };
 
-    // Use passed series or default to aligned Sahel Precipitation vs NDVI benchmarks
-    const activeSeriesA = seriesA || SAHEL_PRECIPITATION_BENCHMARK.observations;
-    const activeSeriesB = seriesB || SAHEL_VEGETATION_BENCHMARK.observations;
+    let activeSeriesA = seriesA;
+    let activeSeriesB = seriesB;
+
+    try {
+      if (!activeSeriesA) {
+        const datasetA = await getLiveDataset({
+          variableId: variableIdA,
+          region: targetRegion,
+          startDate,
+          endDate,
+        });
+        activeSeriesA = datasetA.observations;
+      }
+      if (!activeSeriesB) {
+        const datasetB = await getLiveDataset({
+          variableId: variableIdB,
+          region: targetRegion,
+          startDate,
+          endDate,
+        });
+        activeSeriesB = datasetB.observations;
+      }
+    } catch (providerError: any) {
+      if (providerError instanceof LiveDataUnavailableError) {
+        return NextResponse.json(
+          { error: providerError.message, code: 'LIVE_DATA_UNAVAILABLE' },
+          { status: 422 }
+        );
+      }
+      throw providerError;
+    }
 
     const result = runCrossDomainAnalysis(varA, activeSeriesA, varB, activeSeriesB, targetRegion);
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      correlation: result,
+      ...result,
+    });
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || 'Cross-domain analysis failed' },
@@ -67,4 +109,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

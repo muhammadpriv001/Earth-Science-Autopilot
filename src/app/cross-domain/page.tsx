@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import { EARTH_VARIABLES } from '@/lib/science/earth-variables';
 import { CrossDomainCorrelationResult } from '@/types';
+import { useLocation } from '@/context/LocationContext';
 
 export default function CrossDomainDiscoveryPage() {
+  const { mainLocation } = useLocation();
   const [varA, setVarA] = useState('precipitation');
-  const [varB, setVarB] = useState('ndvi');
+  const [varB, setVarB] = useState('soil-moisture');
   const [result, setResult] = useState<CrossDomainCorrelationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -35,6 +37,12 @@ export default function CrossDomainDiscoveryPage() {
         body: JSON.stringify({
           variableIdA: driverId,
           variableIdB: responseId,
+          region: {
+            name: mainLocation.name,
+            geometryType: 'point',
+            coordinates: mainLocation.coordinates,
+            center: mainLocation.coordinates,
+          },
         }),
       });
 
@@ -46,6 +54,7 @@ export default function CrossDomainDiscoveryPage() {
       const data: CrossDomainCorrelationResult = await res.json();
       setResult(data);
     } catch (err: any) {
+      setResult(null);
       setErrorMsg(err.message || 'Analysis failed');
     } finally {
       setIsLoading(false);
@@ -54,108 +63,84 @@ export default function CrossDomainDiscoveryPage() {
 
   useEffect(() => {
     fetchAnalysis();
-  }, [varA, varB]);
+  }, [varA, varB, mainLocation.name]);
 
   // SVG Scatter plot dimensions
   const scatterW = 460;
-  const scatterH = 300;
-  const sPad = { top: 20, right: 20, bottom: 40, left: 50 };
-  const sInnerW = scatterW - sPad.left - sPad.right;
-  const sInnerH = scatterH - sPad.top - sPad.bottom;
+  const scatterH = 260;
+  const pad = 35;
 
-  let minA = 0;
-  let maxA = 100;
-  let minB = 0;
-  let maxB = 1;
-
-  if (result && result.alignedPoints.length > 0) {
-    const valsA = result.alignedPoints.map(p => p.valueA);
-    const valsB = result.alignedPoints.map(p => p.valueB);
-    minA = Math.min(...valsA);
-    maxA = Math.max(...valsA);
-    minB = Math.min(...valsB);
-    maxB = Math.max(...valsB);
-  }
-
-  const rangeA = maxA - minA || 1;
-  const rangeB = maxB - minB || 1;
-
-  const getScatterX = (val: number) => sPad.left + ((val - minA) / rangeA) * sInnerW;
-  const getScatterY = (val: number) => sPad.top + sInnerH - ((val - minB) / rangeB) * sInnerH;
+  const alignedX = result?.alignedPoints?.map(p => p.valueA) ?? [];
+  const alignedY = result?.alignedPoints?.map(p => p.valueB) ?? [];
+  const minX = alignedX.length ? Math.min(...alignedX) : 0;
+  const maxX = alignedX.length ? Math.max(...alignedX) : 1;
+  const minY = alignedY.length ? Math.min(...alignedY) : 0;
+  const maxY = alignedY.length ? Math.max(...alignedY) : 1;
+  const xScale = (v: number) =>
+    pad + ((v - minX) / (maxX - minX || 1)) * (scatterW - pad * 2);
+  const yScale = (v: number) =>
+    scatterH - pad - ((v - minY) / (maxY - minY || 1)) * (scatterH - pad * 2);
 
   return (
     <div className="mx-auto max-w-7xl px-3 sm:px-6 py-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-900 pb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-            <Activity className="h-4 w-4" /> Multi-Sphere Discovery
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wider">
+            <Activity className="h-4 w-4" /> Earth System Science
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white mt-1">
-            Cross-Domain Earth-System Discovery
+          <h1 className="text-2xl sm:text-4xl font-black text-slate-900 mt-1">
+            Cross-Domain Coupling &amp; Lag Discovery
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-2xl">
-            Detect empirical coupling, lead-lag relationships, and mutual anomalies between distinct atmospheric, biospheric, oceanic, and hydrologic systems.
+          <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+            Uncover lead-lag relationships, teleconnections, and bivariate coupling between any two atmospheric, hydrologic, oceanic, or biosphere variables.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/domains"
-            className="rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
-          >
-            All 11 Domains
-          </Link>
-          <Link
-            href="/vegetation"
-            className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 px-3.5 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-900/30 transition-colors"
-          >
-            Vegetation Intelligence
-          </Link>
-        </div>
+        <Link
+          href="/explore"
+          className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-5 py-2.5 text-xs font-bold text-white shadow-xl shadow-orange-500/25 hover:from-orange-400 hover:to-amber-500 transition-all hover:scale-[1.02]"
+        >
+          <Compass className="h-4 w-4" /> Return to Map GIS
+        </Link>
       </div>
 
-      {/* Preset Case Studies Bar */}
+      {/* Preset Pairings Buttons */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-slate-400 font-semibold mr-1">Scientific Presets:</span>
-        <button
-          onClick={() => {
-            setVarA('precipitation');
-            setVarB('ndvi');
-          }}
-          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${
-            varA === 'precipitation' && varB === 'ndvi'
-              ? 'bg-cyan-500 text-slate-950 font-bold'
-              : 'border border-slate-800 bg-slate-900 text-slate-300 hover:text-white'
-          }`}
-        >
-          Rainfall vs. Sahel Greening (Lagged Monsoon)
-        </button>
-        <button
-          onClick={() => {
-            setVarA('air-temperature');
-            setVarB('sea-ice-extent');
-          }}
-          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${
-            varA === 'air-temperature' && varB === 'sea-ice-extent'
-              ? 'bg-cyan-500 text-slate-950 font-bold'
-              : 'border border-slate-800 bg-slate-900 text-slate-300 hover:text-white'
-          }`}
-        >
-          Air Warming vs. Arctic Sea Ice Retreat
-        </button>
+        <span className="text-xs font-bold text-slate-500 mr-1">Live Pairings:</span>
+        {[
+          { label: 'Precipitation ➔ Soil Moisture', a: 'precipitation', b: 'soil-moisture' },
+          { label: 'Air Temp ➔ Soil Moisture', a: 'air-temperature', b: 'soil-moisture' },
+          { label: 'Air Temp ➔ Precipitation', a: 'air-temperature', b: 'precipitation' },
+          { label: 'Surface Temp ➔ Air Temp', a: 'land-surface-temperature', b: 'air-temperature' },
+        ].map((pair, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              setVarA(pair.a);
+              setVarB(pair.b);
+            }}
+            className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+              varA === pair.a && varB === pair.b
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20'
+                : 'bg-white border border-slate-200/80 text-slate-600 hover:text-slate-900 shadow-sm'
+            }`}
+          >
+            {pair.label}
+          </button>
+        ))}
       </div>
 
-      {/* Variable Selectors */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
+      {/* Variable Selection Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
         <div>
-          <label className="text-[11px] font-semibold text-cyan-400 block mb-1.5 uppercase tracking-wider">
+          <label className="text-[11px] font-bold text-teal-800 block mb-1.5 uppercase tracking-wider">
             Driver Variable (A)
           </label>
           <select
             value={varA}
             onChange={e => setVarA(e.target.value)}
-            className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 text-xs text-white focus:border-cyan-500 focus:outline-none"
+            className="w-full rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-2.5 text-xs font-semibold text-slate-900 focus:border-emerald-500 focus:bg-white focus:outline-none"
           >
             {EARTH_VARIABLES.map(v => (
               <option key={v.id} value={v.id}>
@@ -166,13 +151,13 @@ export default function CrossDomainDiscoveryPage() {
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-emerald-400 block mb-1.5 uppercase tracking-wider">
+          <label className="text-[11px] font-bold text-emerald-800 block mb-1.5 uppercase tracking-wider">
             Response Variable (B)
           </label>
           <select
             value={varB}
             onChange={e => setVarB(e.target.value)}
-            className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 text-xs text-white focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-2.5 text-xs font-semibold text-slate-900 focus:border-emerald-500 focus:bg-white focus:outline-none"
           >
             {EARTH_VARIABLES.map(v => (
               <option key={v.id} value={v.id}>
@@ -184,44 +169,58 @@ export default function CrossDomainDiscoveryPage() {
       </div>
 
       {/* Main Analysis Results */}
+      {errorMsg && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-xs text-amber-900 leading-relaxed">
+          <strong className="font-bold">Live coupling unavailable:</strong> {errorMsg} Both variables
+          must be backed by a live measurement source (air temperature, land-surface temperature,
+          precipitation, soil moisture or sea-ice extent). No synthetic series are substituted.
+        </div>
+      )}
+
+      {isLoading && !result && !errorMsg && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500">
+          Retrieving live measurements and computing lagged cross-correlations…
+        </div>
+      )}
+
       {result && (
         <div className="space-y-6">
           {/* Summary Scorecard */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <div className="text-[11px] text-slate-400">Pearson Correlation (r)</div>
-              <div className="text-2xl font-bold font-mono text-cyan-300 mt-1">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)]">
+              <div className="text-[11px] text-slate-500 font-semibold">Pearson Correlation (r)</div>
+              <div className="text-2xl font-black font-mono text-indigo-700 mt-1">
                 {result.pearsonR >= 0 ? `+${result.pearsonR}` : result.pearsonR}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">Linear Covariation</div>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <div className="text-[11px] text-slate-400">Spearman Rank (ρ)</div>
-              <div className="text-2xl font-bold font-mono text-emerald-300 mt-1">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)]">
+              <div className="text-[11px] text-slate-500 font-semibold">Spearman Rank (ρ)</div>
+              <div className="text-2xl font-black font-mono text-emerald-700 mt-1">
                 {result.spearmanRho >= 0 ? `+${result.spearmanRho}` : result.spearmanRho}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">Monotonic Association</div>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <div className="text-[11px] text-slate-400">Variance Explained (R²)</div>
-              <div className="text-2xl font-bold font-mono text-white mt-1">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)]">
+              <div className="text-[11px] text-slate-500 font-semibold">Variance Explained (R²)</div>
+              <div className="text-2xl font-black font-mono text-slate-900 mt-1">
                 {(result.rSquared * 100).toFixed(1)}%
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">Shared Variance</div>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <div className="text-[11px] text-slate-400">Optimal Lag Peak</div>
-              <div className="text-2xl font-bold font-mono text-amber-300 mt-1">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)]">
+              <div className="text-[11px] text-slate-500 font-semibold">Optimal Lag Peak</div>
+              <div className="text-2xl font-black font-mono text-amber-700 mt-1">
                 {result.optimalLagMonths === 0
                   ? 'Synchronous'
                   : `${Math.abs(result.optimalLagMonths)} Mo ${
                       result.optimalLagMonths < 0 ? 'Lead' : 'Lag'
                     }`}
               </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
+              <div className="text-[10px] text-slate-400 mt-0.5 font-mono">
                 r = {result.optimalLagCorrelation}
               </div>
             </div>
@@ -230,113 +229,97 @@ export default function CrossDomainDiscoveryPage() {
           {/* Bivariate Scatter Plot & Lagged Correlation Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Scatter Plot */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-950 p-6 space-y-4">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 space-y-4 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-white">Bivariate Scatter & OLS Linear Fit</h3>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <h3 className="text-sm font-bold text-slate-900">Bivariate Scatter &amp; OLS Linear Fit</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
                     Y = {result.linearFit.slope} * X + {result.linearFit.intercept}
                   </p>
                 </div>
-                <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[9px] font-bold text-cyan-300">
+                <span className="rounded-full bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 text-[9px] font-bold text-emerald-800">
                   {result.isStatisticallySignificant ? 'p < 0.05 Significant' : 'p ≥ 0.05 Not Sig'}
                 </span>
               </div>
 
               <div className="w-full flex justify-center overflow-x-auto">
                 <svg viewBox={`0 0 ${scatterW} ${scatterH}`} className="w-full max-w-[460px] h-auto">
+                  {/* Grid */}
+                  <rect x={pad} y={pad} width={scatterW - pad * 2} height={scatterH - pad * 2} fill="#f8faf9" stroke="#e2e8f0" />
+                  
                   {/* Scatter points */}
-                  {result.alignedPoints.map((pt, i) => (
-                    <circle
-                      key={i}
-                      cx={getScatterX(pt.valueA)}
-                      cy={getScatterY(pt.valueB)}
-                      r="3.5"
-                      fill="#06b6d4"
-                      opacity="0.65"
-                    />
-                  ))}
-
-                  {/* Regression Line */}
-                  <line
-                    x1={getScatterX(minA)}
-                    y1={getScatterY(result.linearFit.slope * minA + result.linearFit.intercept)}
-                    x2={getScatterX(maxA)}
-                    y2={getScatterY(result.linearFit.slope * maxA + result.linearFit.intercept)}
-                    stroke="#fbbf24"
-                    strokeWidth="2"
-                    strokeDasharray="4 4"
-                  />
+                  {result.alignedPoints.map((pt, i) => {
+                    const cx = xScale(pt.valueA);
+                    const cy = yScale(pt.valueB);
+                    return (
+                      <circle
+                        key={i}
+                        cx={Math.max(pad + 4, Math.min(scatterW - pad - 4, cx))}
+                        cy={Math.max(pad + 4, Math.min(scatterH - pad - 4, cy))}
+                        r={4}
+                        fill="#0d9488"
+                        opacity={0.8}
+                      />
+                    );
+                  })}
                 </svg>
-              </div>
-
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 border-t border-slate-900 pt-2">
-                <span>X-Axis: {result.variableA.name} ({result.variableA.unit})</span>
-                <span>Y-Axis: {result.variableB.name} ({result.variableB.unit})</span>
               </div>
             </div>
 
-            {/* Lagged Correlation Bar Chart */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-950 p-6 space-y-4">
-              <div>
-                <h3 className="text-sm font-bold text-white">Lagged Cross-Correlation (-6 to +6 Months)</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Negative months indicate Variable A leads Variable B (preceding driver).
-                </p>
+            {/* Lagged Correlation Bar Plot */}
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 space-y-4 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Lagged Cross-Correlation Function</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Evaluated from -6 months (response leads) to +6 months (driver leads)
+                  </p>
+                </div>
+                <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                  Max: {result.optimalLagCorrelation}
+                </span>
               </div>
 
-              <div className="space-y-2 pt-2">
-                {result.lagAnalysis.map(lag => {
-                  const pct = Math.abs(lag.correlation) * 100;
+              <div className="h-52 flex items-end justify-between gap-1.5 pt-4 border-b border-slate-200">
+                {(result.lagAnalysis || []).map((lag: { lagMonths: number; correlation: number }) => {
                   const isOptimal = lag.lagMonths === result.optimalLagMonths;
+                  const barH = Math.max(6, Math.abs(lag.correlation) * 140);
                   return (
-                    <div key={lag.lagMonths} className="flex items-center gap-2 text-xs font-mono">
-                      <span className={`w-14 text-right ${isOptimal ? 'text-amber-300 font-bold' : 'text-slate-400'}`}>
-                        {lag.lagMonths === 0 ? '0' : lag.lagMonths > 0 ? `+${lag.lagMonths}m` : `${lag.lagMonths}m`}
-                      </span>
-
-                      <div className="flex-1 bg-slate-900 rounded-full h-4 relative overflow-hidden flex items-center">
-                        <div
-                          className={`h-full ${
-                            isOptimal
-                              ? 'bg-amber-400'
-                              : lag.correlation >= 0
-                              ? 'bg-cyan-500/70'
-                              : 'bg-rose-500/70'
-                          }`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-
-                      <span className={`w-12 text-right ${isOptimal ? 'text-amber-300 font-bold' : 'text-slate-300'}`}>
-                        {lag.correlation >= 0 ? `+${lag.correlation}` : lag.correlation}
+                    <div key={lag.lagMonths} className="flex-1 flex flex-col items-center gap-1.5">
+                      <div
+                        style={{ height: `${barH}px` }}
+                        className={`w-full rounded-t-lg transition-all ${
+                          isOptimal
+                            ? 'bg-emerald-500 shadow-md shadow-emerald-500/25'
+                            : 'bg-slate-300 hover:bg-slate-400'
+                        }`}
+                        title={`Lag ${lag.lagMonths}m: r = ${lag.correlation}`}
+                      />
+                      <span className={`text-[10px] font-mono ${isOptimal ? 'text-emerald-800 font-bold' : 'text-slate-500'}`}>
+                        {lag.lagMonths > 0 ? `+${lag.lagMonths}` : lag.lagMonths}
                       </span>
                     </div>
                   );
                 })}
               </div>
+
+              <div className="text-[10px] text-slate-500 text-center font-mono">
+                Offset in Months (Negative = Response Leads | Positive = Driver Leads)
+              </div>
             </div>
           </div>
 
-          {/* Scientific Interpretation & Epistemological Caveat */}
-          <div className="rounded-3xl border border-slate-800 bg-slate-950 p-6 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-400" />
-              Scientific Epistemology & Causation Advisory
-            </h3>
-
-            <p className="text-xs text-slate-300 leading-relaxed">
-              {result.scientificInterpretation}
+          {/* Scientific Interpretation Card */}
+          <div className="rounded-3xl border border-emerald-200/80 bg-emerald-50/50 p-6 space-y-2">
+            <h4 className="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-emerald-700" /> Statistical Interpretation &amp; Physical Mechanism
+            </h4>
+            <p className="text-xs text-slate-700 leading-relaxed">
+              {result.scientificInterpretation || (result as any).interpretation}
             </p>
-
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4 text-xs text-amber-200 leading-relaxed">
-              <span className="font-bold text-amber-400">Critical Scientific Principle: </span>
-              {result.causationWarning}
-            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-

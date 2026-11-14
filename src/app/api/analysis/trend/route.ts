@@ -9,10 +9,11 @@ import { TimeSeriesObservation } from '@/types';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const observations: TimeSeriesObservation[] = body.observations;
-    const variableName: string = body.variableName || 'Earth System Parameter';
-    const unit: string = body.unit || 'units';
-    const alpha: number = body.alpha || 0.05;
+    const dataset = body.dataset;
+    const observations: TimeSeriesObservation[] = body.observations || dataset?.observations;
+    const variableName: string = body.variableName || dataset?.variableName || 'Earth System Parameter';
+    const unit: string = body.unit || dataset?.unit || 'units';
+    const alpha: number = body.alpha || body.significanceThreshold || 0.05;
 
     if (!observations || !Array.isArray(observations) || observations.length === 0) {
       return NextResponse.json(
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       results,
+      trend: results,
       explanation,
     });
   } catch (err: any) {

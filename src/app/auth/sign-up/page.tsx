@@ -3,40 +3,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Compass, Key, Mail, ArrowRight, User, AlertCircle } from 'lucide-react';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { Key, Mail, ArrowRight, User, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/context/AuthAndInvestigationContext';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { signUp } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-
-    if (!isSupabaseConfigured) {
-      router.push('/dashboard');
-      return;
-    }
-
     setLoading(true);
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName },
-        },
-      });
-      if (error) {
-        setErrorMsg(error.message);
-      } else {
+      const res = await signUp(fullName, email, password);
+      if (res.success) {
         router.push('/dashboard');
+      } else {
+        setErrorMsg(res.error || 'Registration failed');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Registration error');
@@ -47,97 +36,100 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-140px)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950 p-8 shadow-2xl space-y-6">
+      <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-emerald-400/35 bg-gradient-to-br from-[#06211b]/95 via-[#07281f]/92 to-[#0a332a]/95 p-8 shadow-2xl shadow-emerald-950/30 backdrop-blur-md ring-1 ring-white/10 space-y-6">
+        {/* Emerald → orange accent strip */}
+        <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 via-teal-300 to-orange-400" />
+        {/* Subtle ambient glows */}
+        <span className="pointer-events-none absolute -top-24 -right-16 h-44 w-44 rounded-full bg-emerald-400/10 blur-3xl" />
+        <span className="pointer-events-none absolute -bottom-20 -left-16 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
+
         <div className="text-center space-y-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white mx-auto shadow-lg shadow-cyan-500/20">
-            <Compass className="h-6 w-6" />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-500 via-amber-400 to-emerald-400 text-white shadow-lg shadow-orange-500/25">
+            <span className="font-mono text-lg font-black tracking-tighter">//</span>
           </div>
-          <h1 className="text-xl font-bold text-white">Create Researcher Account</h1>
-          <p className="text-xs text-slate-400">
-            Join The Earth Science Autopilot research network
+          <h1 className="text-2xl font-black text-white tracking-tight">Create Researcher Account</h1>
+          <p className="text-xs text-emerald-200/70">
+            Join the spacegeoai.com Earth-System Trend Detective community
           </p>
         </div>
 
-        {!isSupabaseConfigured && (
-          <div className="rounded-xl border border-cyan-900/40 bg-cyan-950/20 p-3 text-xs text-cyan-300 flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-            <span>
-              Local development mode active. Registering will immediately activate your local session.
-            </span>
-          </div>
-        )}
-
         {errorMsg && (
-          <div className="rounded-xl border border-rose-900/40 bg-rose-950/20 p-3 text-xs text-rose-300">
+          <div className="rounded-2xl border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-300">
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-300 uppercase">
-              Full Name
-            </label>
-            <div className="relative">
+          <div>
+            <label className="text-xs font-semibold text-emerald-100/80 block mb-1">Full Name</label>
+            <div className="flex items-center rounded-2xl border border-emerald-700/50 bg-[#0b2b23] px-3.5 py-2.5 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/30">
+              <User className="h-4 w-4 text-emerald-400 mr-2 shrink-0" />
               <input
                 type="text"
                 required
+                autoComplete="name"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                placeholder="Dr. Jane Doe"
-                className="w-full rounded-xl border border-slate-800 bg-slate-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                placeholder="Dr. Alexander Wright"
+                className="w-full bg-transparent text-xs text-white placeholder-emerald-200/30 focus:outline-none"
               />
-              <User className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-300 uppercase">
-              Email Address
-            </label>
-            <div className="relative">
+          <div>
+            <label className="text-xs font-semibold text-emerald-100/80 block mb-1">Email Address</label>
+            <div className="flex items-center rounded-2xl border border-emerald-700/50 bg-[#0b2b23] px-3.5 py-2.5 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/30">
+              <Mail className="h-4 w-4 text-emerald-400 mr-2 shrink-0" />
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="researcher@university.edu"
-                className="w-full rounded-xl border border-slate-800 bg-slate-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                placeholder="a.wright@nasa-spaceapps.org"
+                className="w-full bg-transparent text-xs text-white placeholder-emerald-200/30 focus:outline-none"
               />
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-300 uppercase">
-              Password
-            </label>
-            <div className="relative">
+          <div>
+            <label className="text-xs font-semibold text-emerald-100/80 block mb-1">Password</label>
+            <div className="flex items-center rounded-2xl border border-emerald-700/50 bg-[#0b2b23] px-3.5 py-2.5 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/30">
+              <Key className="h-4 w-4 text-emerald-400 mr-2 shrink-0" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
+                minLength={6}
+                autoComplete="new-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full rounded-xl border border-slate-800 bg-slate-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                placeholder="••••••••"
+                className="w-full bg-transparent text-xs text-white placeholder-emerald-200/30 focus:outline-none"
               />
-              <Key className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-1 text-emerald-300/60 hover:text-emerald-100 focus:outline-none shrink-0"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-600 py-3 text-xs font-bold text-white hover:bg-cyan-500 shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.01]"
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 py-3 text-xs font-bold text-white shadow-lg shadow-orange-500/25 hover:from-orange-400 hover:to-amber-500 hover:scale-[1.01] active:scale-98 transition-all disabled:opacity-60"
           >
-            {loading ? 'Registering...' : 'Complete Registration'}
+            {loading ? 'Creating Account...' : 'Register Researcher Account'}
             <ArrowRight className="h-4 w-4" />
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-400">
-          Already registered?{' '}
-          <Link href="/auth/sign-in" className="font-semibold text-cyan-400 hover:underline">
+        <div className="text-center text-xs text-emerald-200/70">
+          Already have an account?{' '}
+          <Link href="/auth/sign-in" className="font-bold text-emerald-300 hover:text-white hover:underline">
             Sign in
           </Link>
         </div>
@@ -145,4 +137,3 @@ export default function SignUpPage() {
     </div>
   );
 }
-

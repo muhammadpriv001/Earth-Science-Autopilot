@@ -422,11 +422,11 @@ export function MapLibreMap({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search city, lake, coordinate..."
-              className="w-full rounded-2xl border border-slate-700/80 bg-slate-950/85 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-400 shadow-xl backdrop-blur-xl focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-2xl border border-slate-700/80 bg-slate-950/85 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-400 shadow-xl backdrop-blur-xl focus:border-emerald-500 focus:outline-none"
             />
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             {isSearching && (
-              <div className="absolute right-3.5 top-3 h-4 w-4 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+              <div className="absolute right-3.5 top-3 h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
             )}
           </form>
 
@@ -440,7 +440,7 @@ export function MapLibreMap({
                   onClick={() => handleSelectLocation(r)}
                   className="w-full text-left rounded-xl p-2 hover:bg-slate-800/80 text-xs text-slate-200 transition-colors flex items-start gap-2"
                 >
-                  <MapPin className="h-4 w-4 text-cyan-400 mt-0.5 shrink-0" />
+                  <MapPin className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
                   <span className="line-clamp-2">{r.displayName}</span>
                 </button>
               ))}
@@ -456,7 +456,7 @@ export function MapLibreMap({
               onClick={() => handleBasemapChange(style)}
               className={`rounded-xl px-2.5 py-1 text-[11px] font-semibold transition-colors capitalize ${
                 basemapType === style
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-900'
               }`}
             >
@@ -476,7 +476,7 @@ export function MapLibreMap({
       <div className="relative flex-1 w-full h-full min-h-[460px]">
         {!leafletReady && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950 text-slate-400 gap-3">
-            <Globe2 className="h-8 w-8 text-cyan-400 animate-spin-slow" />
+            <Globe2 className="h-8 w-8 text-emerald-400 animate-spin-slow" />
             <p className="text-xs">Loading OpenStreetMap Geolocation Tiles...</p>
           </div>
         )}
@@ -491,21 +491,21 @@ export function MapLibreMap({
       <div className="relative z-10 border-t border-slate-800/80 bg-slate-950/95 px-4 py-3 backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">
         {/* Selected Coordinates & Name Badge */}
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/15 border border-cyan-400/30 text-cyan-400 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-400 shrink-0">
             <Crosshair className="h-4 w-4" />
           </div>
           <div>
             <div className="text-xs font-bold text-white flex items-center gap-2">
               <span>{selectedRegion.name}</span>
               {isRadiusLocked && (
-                <span className="rounded-full bg-cyan-500/20 border border-cyan-400/40 px-2 py-0.2 text-[9px] font-bold text-cyan-300 flex items-center gap-1">
+                <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.2 text-[9px] font-bold text-emerald-300 flex items-center gap-1">
                   <Lock className="h-2.5 w-2.5" /> LOCKED RADIUS
                 </span>
               )}
             </div>
             <div className="text-[11px] font-mono text-slate-400 mt-0.5">
-              Lat: <span className="text-cyan-300">{selectedRegion.center[1].toFixed(4)}°</span>, Lng:{' '}
-              <span className="text-cyan-300">{selectedRegion.center[0].toFixed(4)}°</span> | Footprint:{' '}
+              Lat: <span className="text-emerald-300">{selectedRegion.center[1].toFixed(4)}°</span>, Lng:{' '}
+              <span className="text-emerald-300">{selectedRegion.center[0].toFixed(4)}°</span> | Footprint:{' '}
               <span className="text-slate-200">~{Math.round(Math.PI * radiusKm * radiusKm).toLocaleString()} km²</span>
             </div>
           </div>
@@ -514,9 +514,9 @@ export function MapLibreMap({
         {/* Proximity Radius Slider & Lock Toggle */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-300">
-            <Sliders className="h-3.5 w-3.5 text-cyan-400" />
+            <Sliders className="h-3.5 w-3.5 text-emerald-400" />
             <span className="text-[11px] text-slate-400">Proximity:</span>
-            <span className="font-mono font-bold text-cyan-300 w-16 text-right">{radiusKm} km</span>
+            <span className="font-mono font-bold text-emerald-300 w-16 text-right">{radiusKm} km</span>
             <input
               type="range"
               min="10"
@@ -525,7 +525,7 @@ export function MapLibreMap({
               disabled={isRadiusLocked}
               value={radiusKm}
               onChange={e => onRadiusChange(parseInt(e.target.value, 10))}
-              className={`w-28 sm:w-36 accent-cyan-400 cursor-pointer ${
+              className={`w-28 sm:w-36 accent-emerald-400 cursor-pointer ${
                 isRadiusLocked ? 'opacity-40 cursor-not-allowed' : ''
               }`}
             />
@@ -540,7 +540,7 @@ export function MapLibreMap({
                 onClick={() => onRadiusChange(r)}
                 className={`rounded-lg px-2 py-1 text-[10px] font-mono transition-colors ${
                   radiusKm === r
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 } ${isRadiusLocked ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
@@ -555,7 +555,7 @@ export function MapLibreMap({
             onClick={onToggleRadiusLock}
             className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all shadow-md ${
               isRadiusLocked
-                ? 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'
+                ? 'bg-emerald-400 text-slate-950 hover:bg-emerald-300 font-bold'
                 : 'border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600 hover:text-white'
             }`}
             title={isRadiusLocked ? 'Unlock proximity radius' : 'Lock proximity radius'}

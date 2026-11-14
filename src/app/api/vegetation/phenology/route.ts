@@ -1,23 +1,35 @@
 // ==============================================================================
 // THE EARTH SCIENCE AUTOPILOT — VEGETATION PHENOLOGY API ROUTE
 // ==============================================================================
+// Phenology extraction works only on caller-supplied NDVI/EVI observations.
+// No benchmark series is substituted when observations are absent.
+// ==============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { extractVegetationPhenology } from '@/lib/science/vegetation';
-import { SAHEL_VEGETATION_BENCHMARK } from '@/lib/providers/mock-datasets';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const observations = body.observations || SAHEL_VEGETATION_BENCHMARK.observations;
 
-    const cycles = extractVegetationPhenology(observations);
+    if (!Array.isArray(body.observations) || body.observations.length === 0) {
+      return NextResponse.json(
+        {
+          error:
+            'Vegetation phenology requires a supplied NDVI/EVI observation series. No live vegetation-index provider is configured on this deployment.',
+          code: 'LIVE_DATA_UNAVAILABLE',
+        },
+        { status: 422 }
+      );
+    }
+
+    const cycles = extractVegetationPhenology(body.observations);
 
     // Calculate long-term phenology shift trends (e.g. days shift in SOS over time)
     let sosTrendDaysPerDecade = 0;
     if (cycles.length >= 5) {
       const n = cycles.length;
-      const x = cycles.map((c, i) => i);
+      const x = cycles.map((_, i) => i);
       // convert SOS to day of year
       const y = cycles.map(c => {
         const d = new Date(c.startOfSeason);
@@ -60,4 +72,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message || 'Phenology extraction failed' }, { status: 400 });
   }
 }
-

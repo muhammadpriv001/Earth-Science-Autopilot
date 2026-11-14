@@ -230,7 +230,9 @@ export function runScientificForecast(
     seasonLength = 12,
   } = options;
 
-  const obs = dataset.observations;
+  const obs = dataset.observations.filter(
+    o => o.qualityFlag !== 'MISSING' && Number.isFinite(o.value)
+  );
   const n = obs.length;
 
   if (n < 24) {

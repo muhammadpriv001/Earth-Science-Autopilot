@@ -48,32 +48,32 @@ export function ComparisonChart({ comparison }: Props) {
   );
 
   return (
-    <div className="w-full rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl space-y-4">
+    <div className="w-full rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-900 pb-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-400">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700">
             <GitCompare className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="font-semibold text-white text-sm">
+            <h3 className="font-bold text-slate-900 text-sm">
               Regional Divergence: {variable.name}
             </h3>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               Comparative trend analysis between two distinct geographic regimes
             </p>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 text-xs font-medium">
+        <div className="flex items-center gap-4 text-xs font-semibold">
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-cyan-400" />
-            <span className="text-cyan-300">{regionA.region.name}</span>
+            <span className="h-3 w-3 rounded-full bg-teal-600" />
+            <span className="text-teal-800">{regionA.region.name}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-rose-400" />
-            <span className="text-rose-300">{regionB.region.name}</span>
+            <span className="h-3 w-3 rounded-full bg-orange-500" />
+            <span className="text-orange-800">{regionB.region.name}</span>
           </div>
         </div>
       </div>
@@ -88,50 +88,47 @@ export function ComparisonChart({ comparison }: Props) {
               y1={getY(val)}
               x2={width - margin.right}
               y2={getY(val)}
-              stroke="#1e293b"
-              strokeDasharray="3 3"
+              stroke="#e2e8f0"
+              strokeDasharray="4 4"
             />
             <text
               x={margin.left - 8}
               y={getY(val) + 3}
               textAnchor="end"
-              className="fill-slate-500 text-[10px] font-mono"
+              className="fill-slate-400 text-[10px] font-mono font-medium"
             >
               {val.toFixed(1)}
             </text>
           </g>
         ))}
 
-        {/* Series A Path */}
+        {/* Series A Path (Primary - Deep Teal) */}
         <path
           d={pathA}
           fill="none"
-          stroke="#22d3ee"
+          stroke="#0d9488"
           strokeWidth="2.5"
-          className="drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]"
         />
 
-        {/* Series B Path */}
+        {/* Series B Path (Comparative - Warm Coral/Orange) */}
         <path
           d={pathB}
           fill="none"
-          stroke="#fb7185"
+          stroke="#f97316"
           strokeWidth="2.5"
-          strokeDasharray="4 2"
-          className="drop-shadow-[0_0_8px_rgba(251,113,133,0.4)]"
+          strokeDasharray="5 3"
         />
       </svg>
 
       {/* Divergence Interpretation Banner */}
-      <div className="rounded-xl border border-indigo-900/40 bg-indigo-950/20 p-4">
-        <h4 className="font-semibold text-indigo-300 text-xs mb-1">
+      <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4">
+        <h4 className="font-bold text-emerald-900 text-xs mb-1">
           Scientific Synthesis:
         </h4>
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-xs text-slate-700 leading-relaxed">
           {divergenceSummary.scientificInterpretation}
         </p>
       </div>
     </div>
   );
 }
-

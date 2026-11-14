@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { LocationProvider } from '@/context/LocationContext';
+import { AuthProvider } from '@/context/AuthAndInvestigationContext';
+import { AppLayoutWrapper } from '@/components/layout/AppLayoutWrapper';
 
 export const metadata: Metadata = {
-  title: 'The Earth Science Autopilot | ASK THE EARTH',
+  title: 'The Earth Science Autopilot | spacegeoai.com',
   description: 'AI-assisted Earth-science research, geospatial exploration, and deterministic statistical trend detection for NASA Space Apps Challenge 2026: Be An Earth System Trend Detective!',
   keywords: [
     'NASA Space Apps Challenge 2026',
@@ -43,10 +44,12 @@ export default function RootLayout({
           async
         />
       </head>
-      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-cyan-300 flex flex-col">
-        <Navbar />
-        <main className="flex-1 w-full pt-2 sm:pt-4">{children}</main>
-        <Footer />
+      <body className="min-h-screen bg-[#f8faf9] font-sans text-slate-900 antialiased selection:bg-emerald-500/25 selection:text-emerald-900 flex flex-col">
+        <AuthProvider>
+          <LocationProvider>
+            <AppLayoutWrapper>{children}</AppLayoutWrapper>
+          </LocationProvider>
+        </AuthProvider>
       </body>
     </html>
   );

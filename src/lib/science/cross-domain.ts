@@ -135,8 +135,11 @@ export function runCrossDomainAnalysis(
   region: GeographicRegion
 ): CrossDomainCorrelationResult {
   // 1. Align observations by matching identical date strings
+  const cleanA = seriesA.filter(o => o.qualityFlag !== 'MISSING' && Number.isFinite(o.value));
+  const cleanB = seriesB.filter(o => o.qualityFlag !== 'MISSING' && Number.isFinite(o.value));
+
   const mapB = new Map<string, number>();
-  for (const obs of seriesB) {
+  for (const obs of cleanB) {
     // Match by year-month
     const ym = obs.date.slice(0, 7);
     mapB.set(ym, obs.value);
@@ -150,7 +153,7 @@ export function runCrossDomainAnalysis(
     anomalyB: number;
   }[] = [];
 
-  for (const obs of seriesA) {
+  for (const obs of cleanA) {
     const ym = obs.date.slice(0, 7);
     if (mapB.has(ym)) {
       alignedPoints.push({
