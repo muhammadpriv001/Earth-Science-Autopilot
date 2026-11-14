@@ -10,6 +10,7 @@ export interface EarthVariable {
   system: EarthSystem;
   unit: string;
   description: string;
+  simpleExplanation?: string;
   measurementPrinciple: string;
   typicalRange: string;
   temporalResolution: string;
@@ -29,6 +30,7 @@ export interface GeographicRegion {
   center: [number, number]; // [lng, lat]
   radiusKm?: number; // for circular buffer
   areaKm2?: number;
+  bbox?: number[]; // [minLng, minLat, maxLng, maxLat]
 }
 
 export interface TimeSeriesObservation {

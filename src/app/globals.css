@@ -37,3 +37,9 @@ body {
 .animate-bounce-slow {
   animation: bounce-slow 3s ease-in-out infinite;
 }
+
+/* Leaflet Free OpenStreetMap Cyber-Dark Tile Filter */
+.dark-tiles,
+.leaflet-tile.dark-tiles {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%) !important;
+}

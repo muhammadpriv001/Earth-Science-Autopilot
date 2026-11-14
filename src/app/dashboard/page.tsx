@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/autopilot"
+            href="/explore"
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500 transition-all hover:scale-[1.02]"
           >
             <Sparkles className="h-4 w-4" />

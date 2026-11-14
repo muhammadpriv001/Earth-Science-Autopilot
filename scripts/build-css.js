@@ -43,7 +43,8 @@ async function build() {
   const candidates = Array.from(candidatesSet);
   console.log(`Found ${candidates.length} candidate tokens across src/`);
 
-  const cssInput = fs.readFileSync(path.resolve(__dirname, '../src/app/globals.css'), 'utf8');
+  // Compile directly from tailwindcss root stylesheet
+  const cssInput = '@import "tailwindcss";';
   
   const compiler = await compile(cssInput, {
     base: path.resolve(__dirname, '../src/app'),

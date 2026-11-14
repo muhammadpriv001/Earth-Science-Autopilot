@@ -55,7 +55,7 @@ export default function ProjectsPage() {
         </div>
 
         <Link
-          href="/autopilot"
+          href="/explore"
           className="flex items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/20 hover:bg-cyan-500 transition-colors"
         >
           <Plus className="h-4 w-4" />

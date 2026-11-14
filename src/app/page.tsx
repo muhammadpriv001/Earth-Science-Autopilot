@@ -45,7 +45,7 @@ export default function LandingPage() {
         {/* CTA Buttons */}
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/autopilot"
+            href="/explore"
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-500 hover:scale-[1.02] transition-all"
           >
             <Sparkles className="h-4 w-4" />
