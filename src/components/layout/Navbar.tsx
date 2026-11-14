@@ -15,16 +15,20 @@ import {
   Menu,
   X,
   Sparkles,
+  Trees,
+  Activity,
+  Globe2,
 } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/explore', label: 'Explore & AI', icon: Compass, badge: 'Live' },
-  { href: '/variables', label: 'Variables', icon: Layers },
-  { href: '/datasets', label: 'Datasets', icon: Database },
+  { href: '/domains', label: '11 Domains', icon: Globe2 },
+  { href: '/vegetation', label: 'Vegetation', icon: Trees },
+  { href: '/prediction', label: 'Forecast Lab', icon: Sparkles, badge: 'AI' },
+  { href: '/cross-domain', label: 'Cross-Domain', icon: Activity },
   { href: '/analysis', label: 'Time-Series', icon: LineChart },
   { href: '/compare', label: 'Compare', icon: GitCompare },
   { href: '/resources', label: 'Resources', icon: BookOpen },
-  { href: '/projects', label: 'Projects', icon: FolderGit2 },
 ];
 
 export function Navbar() {

@@ -2,7 +2,24 @@
 // THE EARTH SCIENCE AUTOPILOT — CORE TYPES
 // ==============================================================================
 
-export type EarthSystem = 'Atmosphere' | 'Land' | 'Ocean' | 'Hydrology' | 'Cryosphere' | 'Ecosystems';
+export type EarthSystem =
+  | 'Vegetation & Biosphere'
+  | 'Atmosphere & Climate'
+  | 'Precipitation & Meteorology'
+  | 'Soil & Land Moisture'
+  | 'Hydrology & Freshwater'
+  | 'Oceans & Marine Ecosystems'
+  | 'Cryosphere'
+  | 'Land Surface & Land Use'
+  | 'Fire & Environmental Disasters'
+  | 'Solid Earth & Geophysical Changes'
+  | 'Human Dimensions & Exposure'
+  // Backward compatibility aliases
+  | 'Atmosphere'
+  | 'Land'
+  | 'Ocean'
+  | 'Hydrology'
+  | 'Ecosystems';
 
 export interface EarthVariable {
   id: string;
@@ -144,5 +161,107 @@ export interface ExternalResource {
   url: string;
   description: string;
   challengeRelevance: string;
+}
+
+// ==============================================================================
+// PREDICTION & FORECASTING TYPES
+// ==============================================================================
+
+export interface ForecastPoint {
+  date: string;
+  predictedValue: number;
+  confidenceLower80: number;
+  confidenceUpper80: number;
+  confidenceLower95: number;
+  confidenceUpper95: number;
+}
+
+export interface ModelValidationMetrics {
+  mae: number;
+  rmse: number;
+  mape: number;
+  rSquared: number;
+  directionalAccuracy: number;
+  sampleCount: number;
+}
+
+export interface ForecastResult {
+  variableId: string;
+  variableName: string;
+  unit: string;
+  region: GeographicRegion;
+  modelType: 'Holt-Winters' | 'Seasonal-Naive' | 'AR-Ridge' | 'Multivariable-Ridge';
+  horizonMonths: number;
+  trainPeriod: { start: string; end: string };
+  testPeriod: { start: string; end: string };
+  validationMetrics: ModelValidationMetrics;
+  baselineMetrics: ModelValidationMetrics;
+  historicalObservations: TimeSeriesObservation[];
+  hindcastObservations: { date: string; actual: number; predicted: number }[];
+  forecastPoints: ForecastPoint[];
+  covariatesUsed?: string[];
+  scientificAssumptions: string[];
+  uncertaintyNotice: string;
+}
+
+// ==============================================================================
+// VEGETATION INTELLIGENCE TYPES
+// ==============================================================================
+
+export interface PhenologyCycle {
+  year: number;
+  startOfSeason: string; // SOS date (YYYY-MM-DD)
+  peakOfSeason: string;  // POS date (YYYY-MM-DD)
+  endOfSeason: string;   // EOS date (YYYY-MM-DD)
+  lengthOfSeasonDays: number;
+  baseLevel: number;
+  maximumValue: number;
+  seasonalAmplitude: number;
+}
+
+export interface FireRecoveryAnalysis {
+  fireEventDate: string;
+  preFireBaselineNDVI: number;
+  postFireMinNDVI: number;
+  currentNDVI: number;
+  burnSeverityPercentage: number;
+  recoveryPercentage: number;
+  recoveryTrajectory: { date: string; ndvi: number; expectedRecovery: number }[];
+  estimatedFullRecoveryDate: string | null;
+  status: 'Critical' | 'Active Recovery' | 'Substantially Recovered';
+}
+
+// ==============================================================================
+// CROSS-DOMAIN DISCOVERY TYPES
+// ==============================================================================
+
+export interface CrossDomainCorrelationResult {
+  variableA: EarthVariable;
+  variableB: EarthVariable;
+  region: GeographicRegion;
+  pearsonR: number;
+  spearmanRho: number;
+  pValue: number;
+  isStatisticallySignificant: boolean;
+  rSquared: number;
+  lagAnalysis: {
+    lagMonths: number; // negative = A leads B, positive = B leads A
+    correlation: number;
+  }[];
+  optimalLagMonths: number;
+  optimalLagCorrelation: number;
+  linearFit: {
+    slope: number;
+    intercept: number;
+  };
+  alignedPoints: {
+    date: string;
+    valueA: number;
+    valueB: number;
+    anomalyA: number;
+    anomalyB: number;
+  }[];
+  causationWarning: string;
+  scientificInterpretation: string;
 }
 
