@@ -468,6 +468,17 @@ export const EARTH_VARIABLES: EarthVariable[] = [
   }
 ];
 
+export function getPowerSupportedVariables(): EarthVariable[] {
+  const powerIds = new Set([
+    'air-temperature',
+    'land-surface-temperature',
+    'precipitation',
+    'soil-moisture',
+    'sea-ice-extent',
+  ]);
+  return EARTH_VARIABLES.filter(v => powerIds.has(v.id));
+}
+
 export function getVariableById(id: string): EarthVariable | undefined {
   return EARTH_VARIABLES.find(v => v.id === id);
 }

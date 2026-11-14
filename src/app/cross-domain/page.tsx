@@ -15,7 +15,7 @@ import {
   Clock,
   Compass,
 } from 'lucide-react';
-import { EARTH_VARIABLES } from '@/lib/science/earth-variables';
+import { EARTH_VARIABLES, getPowerSupportedVariables } from '@/lib/science/earth-variables';
 import { CrossDomainCorrelationResult } from '@/types';
 import { useLocation } from '@/context/LocationContext';
 
@@ -142,7 +142,7 @@ export default function CrossDomainDiscoveryPage() {
             onChange={e => setVarA(e.target.value)}
             className="w-full rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-2.5 text-xs font-semibold text-slate-900 focus:border-emerald-500 focus:bg-white focus:outline-none"
           >
-            {EARTH_VARIABLES.map(v => (
+            {getPowerSupportedVariables().map(v => (
               <option key={v.id} value={v.id}>
                 {v.name} ({v.system})
               </option>
@@ -159,7 +159,7 @@ export default function CrossDomainDiscoveryPage() {
             onChange={e => setVarB(e.target.value)}
             className="w-full rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-2.5 text-xs font-semibold text-slate-900 focus:border-emerald-500 focus:bg-white focus:outline-none"
           >
-            {EARTH_VARIABLES.map(v => (
+            {getPowerSupportedVariables().map(v => (
               <option key={v.id} value={v.id}>
                 {v.name} ({v.system})
               </option>

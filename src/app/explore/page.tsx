@@ -1,98 +1,191 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MapLibreMap } from '@/components/maps/MapLibreMap';
 import { ExploreChatPanel } from '@/components/research/ExploreChatPanel';
-import { GeographicRegion } from '@/types';
+import type { ForecastResult, GeographicRegion } from '@/types';
 import {
   Compass,
   ArrowRight,
   Layers,
   Sparkles,
+  Sliders,
 } from 'lucide-react';
-import { EARTH_VARIABLES } from '@/lib/science/earth-variables';
+import {
+  getLiveVariable,
+  getLiveVariables,
+  LIVE_VARIABLES,
+} from '@/lib/science/live-capabilities';
 import { useLocation } from '@/context/LocationContext';
 
 export default function ExplorePage() {
-  const { mainLocation, setAsMainLocation, setRadiusKm, toggleRadiusLock } = useLocation();
+  const {
+    mainLocation,
+    setAsMainLocation,
+    setRadiusKm,
+    toggleRadiusLock,
+  } = useLocation();
 
   const [selectedRegion, setSelectedRegion] = useState<GeographicRegion>({
     name: mainLocation.name,
     geometryType: 'point',
     coordinates: mainLocation.coordinates,
     center: mainLocation.coordinates,
-    areaKm2: Math.round(Math.PI * Math.pow(mainLocation.radiusKm, 2)),
+    areaKm2: Math.round(Math.PI * mainLocation.radiusKm * mainLocation.radiusKm),
   });
+  const [selectedVariable, setSelectedVariable] = useState('air-temperature');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [forecast, setForecast] = useState<ForecastResult | null>(null);
 
-  const [selectedVariable, setSelectedVariable] = useState(EARTH_VARIABLES[0].id);
+  const horizonMonths = 24;
+  const modelType = 'holt-winters' as const;
+  const radiusKm = mainLocation.radiusKm || 100;
+  const isRadiusLocked = Boolean(mainLocation.isRadiusLocked);
 
-  // Guarantee page starts scrolled to the very top on load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Sync with global mainLocation when changed from top search bar
+  // Keep the map selection synchronized with the application's global location.
   useEffect(() => {
-    setSelectedRegion(prev => ({
-      ...prev,
+    setSelectedRegion(previous => ({
+      ...previous,
       name: mainLocation.name,
       coordinates: mainLocation.coordinates,
       center: mainLocation.coordinates,
-      areaKm2: Math.round(Math.PI * Math.pow(mainLocation.radiusKm, 2)),
+      areaKm2: Math.round(Math.PI * radiusKm * radiusKm),
     }));
-  }, [mainLocation.name, mainLocation.coordinates[0], mainLocation.coordinates[1], mainLocation.radiusKm]);
+  }, [
+    mainLocation.name,
+    mainLocation.coordinates[0],
+    mainLocation.coordinates[1],
+    radiusKm,
+  ]);
 
-  // When map clicks/moves a region, sync back to global mainLocation
   const handleRegionSelect = (region: GeographicRegion) => {
     setSelectedRegion(region);
-    setAsMainLocation(region.name, region.center, mainLocation.radiusKm);
+    setAsMainLocation(region.name, region.center ?? region.coordinates, radiusKm);
   };
 
-  const currentVar = EARTH_VARIABLES.find(v => v.id === selectedVariable) || EARTH_VARIABLES[0];
+  const currentVar = getLiveVariable(selectedVariable) || LIVE_VARIABLES[0];
+  const categoryVariables = getLiveVariables(selectedCategory);
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    const available = getLiveVariables(categoryId);
+    if (available.length > 0 && !available.some(variable => variable.id === selectedVariable)) {
+      setSelectedVariable(available[0].id);
+    }
+  };
+
+  // Keep the same forecast service used by the Forecast Laboratory. The map
+  // and variable are the only inputs that change this Explore-page forecast.
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadForecast = async () => {
+      setForecast(null);
+      try {
+        const response = await fetch('/api/prediction/forecast', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            variableId: selectedVariable,
+            region: {
+              name: selectedRegion.name,
+              geometryType: selectedRegion.geometryType,
+              coordinates: selectedRegion.coordinates,
+              center: selectedRegion.center ?? selectedRegion.coordinates,
+            },
+            startDate: '1994-01-01',
+            endDate: new Date().toISOString().slice(0, 10),
+            horizonMonths,
+            modelType,
+          }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.forecast) {
+          throw new Error(data.error || data.message || `Forecast API returned HTTP ${response.status}`);
+        }
+        setForecast(data.forecast as ForecastResult);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error('Explore forecast request failed:', error);
+          setForecast(null);
+        }
+      }
+    };
+
+    void loadForecast();
+    return () => controller.abort();
+  }, [
+    selectedRegion.name,
+    selectedRegion.geometryType,
+    selectedRegion.coordinates[0],
+    selectedRegion.coordinates[1],
+    selectedVariable,
+  ]);
+
+  const regionCenter = selectedRegion.center ?? selectedRegion.coordinates;
 
   return (
-    <div className="mx-auto max-w-[1920px] px-3 sm:px-6 py-4 space-y-4">
-      {/* Top Header Bar */}
+    <div className="mx-auto max-w-[1920px] space-y-4 px-3 py-4 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-800">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300 bg-emerald-100 text-emerald-800">
             <Compass className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+            <h1 className="flex items-center gap-2 text-base font-black text-slate-900 sm:text-lg">
               Explore &amp; AI Autopilot
-              <span className="rounded-full bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-800">
+              <span className="rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-800">
                 Interactive GIS
               </span>
             </h1>
             <p className="text-[11px] text-slate-500">
-              Click anywhere on the map to pin coordinates. Location updates automatically in the global search bar and across all analytical modules.
+              Click anywhere on the map to pin coordinates. Location updates automatically in the global search bar and across analytical modules.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Variable Selector */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
+            <Sliders className="h-4 w-4 text-emerald-600" />
+            <select
+              value={selectedCategory}
+              onChange={event => handleCategoryChange(event.target.value)}
+              className="cursor-pointer bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
+              aria-label="Earth-system category"
+            >
+              <option value="all">All live categories</option>
+              <option value="climate">Atmosphere &amp; Climate</option>
+              <option value="water">Water &amp; Soil Moisture</option>
+              <option value="cryosphere">Cryosphere &amp; Sea Ice</option>
+            </select>
+          </div>
+
           <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
             <Layers className="h-4 w-4 text-emerald-600" />
             <select
               value={selectedVariable}
-              onChange={e => setSelectedVariable(e.target.value)}
-              className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer pr-1"
+              onChange={event => setSelectedVariable(event.target.value)}
+              className="cursor-pointer bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
+              aria-label="Live variable"
             >
-              {EARTH_VARIABLES.map(v => (
-                <option key={v.id} value={v.id} className="bg-white text-slate-900">
-                  {v.name} ({v.unit})
+              {categoryVariables.map(variable => (
+                <option key={variable.id} value={variable.id}>
+                  {variable.name} ({variable.unit})
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Launch Full Analysis CTA (Warm Coral Accent Button) */}
           <Link
-            href={`/analysis?variable=${selectedVariable}&lat=${(selectedRegion.center || selectedRegion.coordinates)?.[1] ?? 31.5204}&lng=${(selectedRegion.center || selectedRegion.coordinates)?.[0] ?? 74.3587}`}
-            className="flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:from-orange-400 hover:to-amber-500 transition-all hover:scale-[1.02]"
+            href={`/analysis?variable=${selectedVariable}&lat=${regionCenter[1] ?? 31.5204}&lng=${regionCenter[0] ?? 74.3587}`}
+            className="flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500"
           >
             <Sparkles className="h-4 w-4" />
             Investigate Analytics
@@ -101,28 +194,30 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* Main Two-Panel Layout: Map (Left) + AI Chat (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-175px)] min-h-[640px]">
-        {/* Left: Map Panel (8 cols) */}
-        <div className="lg:col-span-8 h-full rounded-3xl overflow-hidden border border-slate-200/80 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] bg-white/95">
+      <div className="grid grid-cols-1 gap-4 lg:h-[calc(100dvh-175px)] lg:min-h-[520px] lg:grid-cols-12">
+        <div className="h-[56vh] min-h-[300px] overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] lg:col-span-8 lg:h-full lg:min-h-0">
           <MapLibreMap
             selectedRegion={selectedRegion}
             onRegionSelect={handleRegionSelect}
-            radiusKm={mainLocation.radiusKm}
+            radiusKm={radiusKm}
             onRadiusChange={setRadiusKm}
-            isRadiusLocked={mainLocation.isRadiusLocked}
+            isRadiusLocked={isRadiusLocked}
             onToggleRadiusLock={toggleRadiusLock}
           />
         </div>
 
-        {/* Right: AI Chat Panel (4 cols) */}
-        <div className="lg:col-span-4 h-full rounded-3xl overflow-hidden border border-slate-200/80 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] bg-white/95">
+        <div className="h-[75dvh] min-h-[360px] lg:col-span-4 lg:h-[86%] lg:max-h-[560px] lg:min-h-[360px] lg:self-center">
           <ExploreChatPanel
+            mode="explore"
             region={selectedRegion}
             variable={selectedVariable}
             variableName={currentVar.name}
-            radiusKm={mainLocation.radiusKm}
-            isRadiusLocked={mainLocation.isRadiusLocked}
+            variableUnit={currentVar.unit}
+            radiusKm={radiusKm}
+            isRadiusLocked={isRadiusLocked}
+            horizonMonths={horizonMonths}
+            modelType={modelType}
+            forecast={forecast}
           />
         </div>
       </div>

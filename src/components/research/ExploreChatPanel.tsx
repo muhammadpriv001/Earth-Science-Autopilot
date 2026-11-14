@@ -1,360 +1,343 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { GeographicRegion } from '@/types';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
+import type { GeographicRegion, ForecastResult } from '@/types';
 import {
-  Sparkles,
-  Send,
-  MapPin,
-  Lock,
-  RotateCcw,
-  Compass,
   Bot,
-  User,
-  ArrowRight,
-  Layers,
   Circle,
+  Compass,
+  Layers,
+  Lock,
+  MapPin,
+  RotateCcw,
+  Send,
+  User,
 } from 'lucide-react';
 
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  provenance?: string;
-}
-
-interface Props {
+interface ExploreChatPanelProps {
   region: GeographicRegion;
   variable: string;
   variableName: string;
+  variableUnit: string;
   radiusKm: number;
   isRadiusLocked: boolean;
+  horizonMonths?: number;
+  modelType?: 'holt-winters' | 'seasonal-naive';
+  forecast?: ForecastResult | null;
+  mode?: 'explore' | 'forecast';
+}
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
+  time: string;
+  provenance?: string;
 }
 
 const QUICK_PROMPTS = [
-  'What environmental trends should I expect here?',
+  'What trends are happening locally?',
   'Which NASA datasets cover this area?',
-  'Is this region experiencing warming or cooling?',
-  'What statistical methods should I use?',
-  'Are there any known climate risks here?',
+  'Is the temperature rising or falling here?',
+  'What analysis methods should I use?',
 ];
+
+function formatMetric(value: unknown, digits = 3): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value.toFixed(digits)
+    : 'not reported';
+}
 
 export function ExploreChatPanel({
   region,
   variable,
   variableName,
+  variableUnit,
   radiusKm,
   isRadiusLocked,
-}: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  horizonMonths = 24,
+  modelType = 'holt-winters',
+  forecast = null,
+  mode = 'explore',
+}: ExploreChatPanelProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: 'assistant',
+      text:
+        mode === 'forecast'
+          ? `Hello! I am your Earth-Science Forecast Assistant. I can help interpret the measured record and the forecast currently loaded for ${region.name}. Ask about the trajectory, uncertainty intervals, seasonal behaviour, or model validation.`
+          : `Hello! I am your Earth-Science AI Assistant. I can investigate environmental trends, historical observations, seasonal patterns, and climate risks for ${region.name}. Ask me about the selected location and variable.`,
+      time: 'Just now',
+    },
+  ]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll chat container to latest message without scrolling outer page window
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  // When the region coordinates or name changes, add a contextual system note
-  const prevCoordRef = useRef<string>(`${region.center[0].toFixed(3)},${region.center[1].toFixed(3)}`);
-  const prevNameRef = useRef<string>(region.name);
+  const currentTime = () =>
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   useEffect(() => {
-    const coordKey = `${region.center[0].toFixed(3)},${region.center[1].toFixed(3)}`;
-    const coordChanged = coordKey !== prevCoordRef.current;
-    const nameChanged = region.name !== prevNameRef.current && !region.name.startsWith('Location (');
+    chatContainerRef.current?.scrollTo({
+      top: chatContainerRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [messages, chatLoading]);
 
-    if (coordChanged || nameChanged) {
-      prevCoordRef.current = coordKey;
-      prevNameRef.current = region.name;
-      const systemMsg: ChatMessage = {
-        id: `sys-${Date.now()}`,
-        role: 'system',
-        content: `📍 Location context updated — now investigating **${region.name}** (${region.center[1].toFixed(3)}°N, ${region.center[0].toFixed(3)}°E) within a ${radiusKm} km buffer.`,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, systemMsg]);
-    }
-  }, [region.name, region.center, radiusKm]);
+  // Start a fresh conversation when the investigation context changes.
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        text:
+          mode === 'forecast'
+            ? `Forecast context updated for ${region.name}. I am ready to discuss ${variableName}, its measured history, and the currently loaded model output.`
+            : `Investigation context updated to ${region.name}. Ask me about ${variableName}, environmental trends, seasonal cycles, or climate risks.`,
+        time: currentTime(),
+      },
+    ]);
+    // Deliberately reset only when the selected place or variable changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [region.name, region.center?.[0], region.center?.[1], variable, mode]);
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
+  const handleClearChat = () => {
+    setMessages([
+      {
+        role: 'assistant',
+        text: `Conversation cleared. I am ready to investigate ${region.name}. Ask me about its environmental conditions, climate risks, or future projections.`,
+        time: currentTime(),
+      },
+    ]);
+    setInputMessage('');
+  };
 
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMsg]);
-    setInputValue('');
-    setIsLoading(true);
+  const handleSendMessage = async (
+    event?: FormEvent<HTMLFormElement>,
+    directMessage?: string,
+  ) => {
+    event?.preventDefault();
+    const userText = (directMessage ?? inputMessage).trim();
+    if (!userText || chatLoading) return;
+
+    setInputMessage('');
+    setMessages(previous => [
+      ...previous,
+      { role: 'user', text: userText, time: currentTime() },
+    ]);
+    setChatLoading(true);
 
     try {
-      const res = await fetch('/api/explore/chat', {
+      const latestPoint = forecast?.forecastPoints?.[
+        Math.max(0, Math.min(horizonMonths - 1, (forecast?.forecastPoints?.length ?? 1) - 1))
+      ];
+
+      const forecastContext = mode === 'forecast'
+        ? [
+          `Forecast workspace context: ${horizonMonths}-month horizon; model ${modelType}.`,
+          latestPoint
+            ? `The loaded forecast's selected horizon point is ${formatMetric(latestPoint.predictedValue)} ${variableUnit}; its 95% interval is ${formatMetric(latestPoint.confidenceLower95)} to ${formatMetric(latestPoint.confidenceUpper95)} ${variableUnit}. These are model outputs, not direct observations.`
+            : 'No forecast output is currently loaded. Do not invent projected values.',
+          `Validation RMSE: ${formatMetric(forecast?.validationMetrics?.rmse)} ${variableUnit}.`,
+        ].join('\n')
+        : '';
+
+      // IMPORTANT: the API route reads body.message, not body.question.
+      const message = [
+        mode === 'forecast' ? `[FORECAST WORKSPACE: ${region.name}]` : `[EXPLORE INVESTIGATION: ${region.name}]`,
+        `Selected variable: ${variable} (${variableName}, ${variableUnit}).`,
+        `Forecast horizon: ${horizonMonths} months. Model: ${modelType}.`,
+        forecastContext,
+        `User question: ${userText}`,
+      ].filter(Boolean).join('\n\n');
+
+      const response = await fetch('/api/explore/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: text,
+          message,
           region: {
             name: region.name,
             geometryType: region.geometryType,
             coordinates: region.coordinates,
-            center: region.center,
+            center: region.center ?? region.coordinates,
           },
           variable,
+          radiusKm,
+          isRadiusLocked,
         }),
       });
 
-      const data = await res.json();
-      const assistantMsg: ChatMessage = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.answer || 'I evaluated your inquiry against current satellite indicators.',
-        timestamp: new Date(),
-        provenance: data.provenance,
-      };
-      setMessages(prev => [...prev, assistantMsg]);
-    } catch (err) {
-      const errorMsg: ChatMessage = {
-        id: `err-${Date.now()}`,
-        role: 'assistant',
-        content: 'Unable to reach the science AI reasoning agent. Using local heuristics and historical reanalysis baseline.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || data.message || `Chat API returned HTTP ${response.status}`);
+      }
+
+      const reply = [data.reply, data.response, data.answer]
+        .find(value => typeof value === 'string' && value.trim());
+
+      if (!reply) {
+        throw new Error('The chat API returned a successful response but no reply field.');
+      }
+
+      setMessages(previous => [
+        ...previous,
+        {
+          role: 'assistant',
+          text: reply,
+          time: currentTime(),
+          provenance: typeof data.provenance === 'string' ? data.provenance : undefined,
+        },
+      ]);
+    } catch (error) {
+      console.error('Earth Science AI chat error:', error);
+      setMessages(previous => [
+        ...previous,
+        {
+          role: 'assistant',
+          text: `The request failed: ${error instanceof Error ? error.message : 'Unknown network or server error'}. Check the browser Network tab and the /api/explore/chat server logs.`,
+          time: currentTime(),
+        },
+      ]);
     } finally {
-      setIsLoading(false);
+      setChatLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(inputValue);
-  };
-
-  const handleClearChat = () => {
-    setMessages([]);
-  };
-
-  // Simple markdown-like rendering (bold, inline code, bullet points, headings)
-  const renderContent = (text: string) => {
-    const lines = text.split('\n');
-    return lines.map((line, i) => {
-      // Heading H3
-      if (line.startsWith('### ')) {
-        return (
-          <h3 key={i} className="text-sm font-bold text-slate-900 mt-2 mb-1">
-            {renderInline(line.slice(4))}
-          </h3>
-        );
-      }
-      // Heading H2
-      if (line.startsWith('## ')) {
-        return (
-          <h2 key={i} className="text-sm font-bold text-emerald-800 mt-2 mb-1">
-            {renderInline(line.slice(3))}
-          </h2>
-        );
-      }
-      // Bullet
-      if (line.startsWith('- ') || line.startsWith('* ')) {
-        return (
-          <div key={i} className="flex gap-2 mt-0.5">
-            <span className="text-emerald-600 mt-0.5 shrink-0">•</span>
-            <span>{renderInline(line.slice(2))}</span>
-          </div>
-        );
-      }
-      // Numbered
-      if (/^\d+\.\s/.test(line)) {
-        const match = line.match(/^(\d+)\.\s(.*)$/);
-        if (match) {
-          return (
-            <div key={i} className="flex gap-2 mt-0.5">
-              <span className="text-emerald-700 font-mono text-[11px] mt-0.5 shrink-0 w-4 text-right font-bold">{match[1]}.</span>
-              <span>{renderInline(match[2])}</span>
-            </div>
-          );
-        }
-      }
-      // Block quote
-      if (line.startsWith('> ')) {
-        return (
-          <div key={i} className="border-l-2 border-emerald-500/40 pl-3 my-1 text-slate-600 italic">
-            {renderInline(line.slice(2))}
-          </div>
-        );
-      }
-      // Empty line
-      if (line.trim() === '') return <div key={i} className="h-1.5" />;
-      // Normal
-      return <p key={i} className="mt-0.5">{renderInline(line)}</p>;
-    });
-  };
-
-  const renderInline = (text: string): React.ReactNode => {
-    // Bold **text**
-    const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={i} className="font-bold text-slate-900">{part.slice(2, -2)}</strong>;
-      }
-      if (part.startsWith('`') && part.endsWith('`')) {
-        return <code key={i} className="rounded bg-slate-100 border border-slate-200 px-1 py-0.5 text-[11px] text-emerald-800 font-mono font-bold">{part.slice(1, -1)}</code>;
-      }
-      return <span key={i}>{part}</span>;
-    });
-  };
-
   return (
-    <div className="flex flex-col h-full rounded-3xl border border-slate-200/80 bg-white/95 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md overflow-hidden">
-      {/* Panel Header */}
-      <div className="border-b border-slate-100 bg-[#f8faf9] px-4 py-3 shrink-0">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-emerald-400/70 bg-gradient-to-br from-emerald-200/90 via-emerald-100/90 to-teal-200/80 shadow-xl shadow-emerald-900/15 ring-1 ring-emerald-200/70 backdrop-blur-xl">
+      <div className="shrink-0 border-b border-emerald-300/70 bg-gradient-to-r from-emerald-300/75 via-emerald-200/70 to-teal-200/70 px-4 py-3 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 shadow-xs">
-              <Sparkles className="h-4 w-4" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-orange-400/60 bg-orange-500/15 text-orange-600 shadow-xs">
+              <Compass className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-slate-900">Earth Science AI</h2>
-              <p className="text-[10px] text-slate-500 font-medium">Context-aware research assistant</p>
+              <h2 className="text-xs font-bold text-emerald-950">
+                {mode === 'forecast' ? 'Forecast AI Detective' : 'Earth Science AI'}
+              </h2>
+              <p className="text-[10px] font-medium text-emerald-800/80">
+                Context-aware research assistant
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={handleClearChat}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+            className="rounded-lg p-1.5 text-emerald-800/70 transition-colors hover:bg-orange-500/10 hover:text-orange-700"
             title="Clear conversation"
+            aria-label="Clear conversation"
           >
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        {/* Live Context Badge */}
-        <div className="mt-2.5 rounded-2xl border border-slate-200/80 bg-white p-2.5 space-y-1 shadow-xs">
+        <div className="mt-2.5 space-y-1 rounded-2xl border border-emerald-300/70 bg-white/75 p-2.5 shadow-xs backdrop-blur-sm">
           <div className="flex items-center gap-2 text-[11px]">
-            <MapPin className="h-3 w-3 text-emerald-600 shrink-0" />
-            <span className="text-slate-800 truncate font-bold">{region.name}</span>
+            <MapPin className="h-3 w-3 shrink-0 text-emerald-600" />
+            <span className="truncate font-bold text-slate-800">{region.name}</span>
             {isRadiusLocked && <Lock className="h-2.5 w-2.5 text-emerald-600" />}
           </div>
-          <div className="flex items-center gap-3 text-[10px] text-slate-500 font-medium">
+          <div className="flex items-center gap-3 text-[10px] font-medium text-emerald-800/70">
             <span className="flex items-center gap-1">
               <Circle className="h-2.5 w-2.5 text-emerald-500" />
               {radiusKm} km radius
             </span>
-            <span className="flex items-center gap-1">
-              <Layers className="h-2.5 w-2.5 text-teal-600" />
+            <span className="flex min-w-0 items-center gap-1 truncate">
+              <Layers className="h-2.5 w-2.5 shrink-0 text-teal-600" />
               {variableName}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Chat Messages Area */}
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center text-center py-6 gap-3.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-800">
-              <Compass className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-slate-900">Ask about this location</p>
-              <p className="text-[11px] text-slate-500 mt-0.5 max-w-[220px]">
-                Select a point on the map and ask about trends, datasets, or climate risks in that area.
-              </p>
-            </div>
-            <div className="w-full space-y-1.5 mt-1">
-              {QUICK_PROMPTS.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => sendMessage(prompt)}
-                  className="w-full text-left rounded-xl border border-slate-200 bg-[#f8faf9] hover:bg-white hover:border-emerald-400 p-2.5 text-[11px] font-medium text-slate-700 hover:text-slate-900 transition-all flex items-center gap-2 shadow-xs"
-                >
-                  <ArrowRight className="h-3 w-3 text-emerald-600 shrink-0" />
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {messages.map(msg => (
-          <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            {msg.role === 'assistant' && (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 mt-0.5">
-                <Bot className="h-3.5 w-3.5" />
+      <div
+        ref={chatContainerRef}
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-emerald-50/60 via-emerald-100/40 to-emerald-200/50 px-4 py-3 scroll-smooth"
+        aria-live="polite"
+      >
+        {messages.map((message, index) => (
+          <div
+            key={`${message.time}-${index}`}
+            className={`flex gap-2.5 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            {message.role === 'assistant' && (
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-100 text-emerald-800">
+                <Bot className="h-4 w-4" />
               </div>
             )}
-
-            <div
-              className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[12px] leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-br-md shadow-md'
-                  : msg.role === 'system'
-                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium w-full max-w-full'
-                  : 'bg-[#f8faf9] border border-slate-200 text-slate-800 rounded-bl-md shadow-xs'
-              }`}
-            >
-              {msg.role === 'assistant' ? (
-                <div className="space-y-0.5">{renderContent(msg.content)}</div>
-              ) : (
-                renderInline(msg.content)
+            <div className={`min-w-0 max-w-[85%] break-words rounded-2xl px-4 py-3 text-xs leading-relaxed ${message.role === 'user' ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' : 'border border-slate-200 bg-[#f8faf9] text-slate-800 shadow-xs'}`}>
+              <p className="whitespace-pre-wrap">{message.text}</p>
+              {message.provenance && (
+                <p className="mt-2 border-t border-slate-200 pt-1.5 text-[9px] text-emerald-800">
+                  Source: {message.provenance}
+                </p>
               )}
-              {msg.provenance && (
-                <div className="mt-2 pt-2 border-t border-slate-200/80 text-[9px] text-slate-500 font-mono">
-                  Source: {msg.provenance}
-                </div>
-              )}
+              <div className={`mt-1.5 text-[9px] font-mono ${message.role === 'user' ? 'text-orange-100 text-right' : 'text-slate-400'}`}>
+                {message.time}
+              </div>
             </div>
-
-            {msg.role === 'user' && (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-orange-100 border border-orange-300 text-orange-800 mt-0.5">
-                <User className="h-3.5 w-3.5" />
+            {message.role === 'user' && (
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-orange-300 bg-orange-100 text-orange-800">
+                <User className="h-4 w-4" />
               </div>
             )}
           </div>
         ))}
 
-        {isLoading && (
+        {chatLoading && (
           <div className="flex gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 mt-0.5">
-              <Bot className="h-3.5 w-3.5" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-100 text-emerald-800">
+              <Bot className="h-4 w-4" />
             </div>
-            <div className="rounded-2xl bg-[#f8faf9] border border-slate-200 px-4 py-3 rounded-bl-md shadow-xs">
-              <div className="flex gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
+            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-3 text-xs text-slate-500">
+              <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500" />
+              Retrieving Earth-observation evidence and preparing an answer...
             </div>
           </div>
         )}
       </div>
 
-      {/* Input Form */}
-      <div className="border-t border-slate-100 bg-white p-3 shrink-0">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      <div className="shrink-0 border-t border-emerald-300/70 bg-white/60 px-3.5 py-2">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+          {QUICK_PROMPTS.map(prompt => (
+            <button
+              key={prompt}
+              type="button"
+              disabled={chatLoading}
+              onClick={() => void handleSendMessage(undefined, prompt)}
+              className="whitespace-nowrap rounded-xl border border-emerald-300/70 bg-white/80 px-2.5 py-1.5 text-[10px] font-bold text-emerald-900 transition-colors hover:border-orange-400/70 hover:text-orange-700 disabled:opacity-50"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <form
+        onSubmit={event => void handleSendMessage(event)}
+        className="shrink-0 border-t border-emerald-300/70 bg-white/80 p-3.5 backdrop-blur-sm"
+      >
+        <div className="relative flex items-center">
           <input
             type="text"
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            placeholder={`Ask about ${region.name}...`}
-            disabled={isLoading}
-            className="flex-1 rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none disabled:opacity-50 shadow-inner"
+            value={inputMessage}
+            onChange={event => setInputMessage(event.target.value)}
+            placeholder="Ask Earth Science AI..."
+            disabled={chatLoading}
+            className="w-full rounded-2xl border border-emerald-300/70 bg-emerald-50/70 px-4 py-3 pr-12 text-xs font-medium text-emerald-950 shadow-inner placeholder:text-emerald-700/50 focus:border-emerald-500 focus:bg-white focus:outline-none disabled:opacity-60"
           />
           <button
             type="submit"
-            disabled={isLoading || !inputValue.trim()}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            disabled={!inputMessage.trim() || chatLoading}
+            className="absolute right-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 p-2.5 text-white shadow-sm transition-all hover:from-orange-600 hover:to-amber-600 disabled:opacity-40"
+            title="Send message"
+            aria-label="Send message"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3.5 w-3.5" />
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }
+
+export default ExploreChatPanel;

@@ -1,33 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from '@/context/LocationContext';
-import { useAuth } from '@/context/AuthAndInvestigationContext';
-import { EARTH_VARIABLES } from '@/lib/science/earth-variables';
-import { ForecastResult } from '@/types';
+import {
+  getLiveVariable,
+  LIVE_VARIABLE_GROUPS,
+  LIVE_VARIABLES,
+} from '@/lib/science/live-capabilities';
+import type { ForecastResult, GeographicRegion } from '@/types';
 import { ForecastChart } from '@/components/charts/ForecastChart';
+import { ExploreChatPanel } from '@/components/research/ExploreChatPanel';
 import {
   Sparkles,
-  Sliders,
-  Send,
   RefreshCw,
-  TrendingUp,
   AlertTriangle,
   Layers,
-  MapPin,
-  Calendar,
-  ShieldCheck,
-  Bot,
-  User,
-  ArrowRight,
-  ChevronDown,
-  Info,
 } from 'lucide-react';
-import Link from 'next/link';
 
 export default function ForecastAIPage() {
   const { mainLocation } = useLocation();
-  const { saveInvestigation } = useAuth();
 
   const [selectedVariable, setSelectedVariable] = useState('air-temperature');
   const [horizonMonths, setHorizonMonths] = useState<number>(24);
@@ -38,31 +29,34 @@ export default function ForecastAIPage() {
   const [forecast, setForecast] = useState<ForecastResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Forecast AI Chat
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string; time: string }>>([
-    {
-      role: 'assistant',
-      text: `Hello! I am your Earth-Science Forecast Assistant. I evaluate time-series trajectories, Holt-Winters exponential smoothing forecasts, and out-of-sample confidence intervals for ${mainLocation.name}. Ask me about future seasonal cycles, drought probabilities, or environmental tipping points.`,
-      time: 'Just now',
-    },
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
+  const currentVar = getLiveVariable(selectedVariable) || LIVE_VARIABLES[0];
+  const radiusKm = mainLocation.radiusKm || 100;
+  const isRadiusLocked = Boolean(mainLocation.isRadiusLocked);
 
-  const fetchForecast = async () => {
+  const region: GeographicRegion = {
+    name: mainLocation.name,
+    geometryType: 'point',
+    coordinates: mainLocation.coordinates,
+    center: mainLocation.coordinates,
+    areaKm2: Math.round(Math.PI * radiusKm * radiusKm),
+  };
+
+  const fetchForecast = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setErrorMsg(null);
+
     try {
-      const res = await fetch('/api/prediction/forecast', {
+      const response = await fetch('/api/prediction/forecast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal,
         body: JSON.stringify({
           variableId: selectedVariable,
           region: {
-            name: mainLocation.name,
-            geometryType: 'point',
-            coordinates: mainLocation.coordinates,
-            center: mainLocation.coordinates,
+            name: region.name,
+            geometryType: region.geometryType,
+            coordinates: region.coordinates,
+            center: region.center,
           },
           startDate: '1994-01-01',
           endDate: new Date().toISOString().slice(0, 10),
@@ -70,87 +64,36 @@ export default function ForecastAIPage() {
           modelType,
         }),
       });
-      const data = await res.json();
-      if (res.ok && data.forecast) {
-        setForecast(data.forecast);
-      } else {
-        setForecast(null);
-        setErrorMsg(data.error || 'Live observations are unavailable for this variable.');
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.forecast) {
+        throw new Error(data.error || data.message || `Forecast API returned HTTP ${response.status}`);
       }
-    } catch (err) {
-      console.error('Forecast error:', err);
+
+      setForecast(data.forecast as ForecastResult);
+    } catch (error) {
+      if (signal?.aborted) return;
+      console.error('Forecast request failed:', error);
       setForecast(null);
-      setErrorMsg('Live observations could not be retrieved.');
+      setErrorMsg(error instanceof Error ? error.message : 'Live observations could not be retrieved.');
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
-  };
+  }, [
+    selectedVariable,
+    horizonMonths,
+    modelType,
+    region.name,
+    region.geometryType,
+    region.coordinates[0],
+    region.coordinates[1],
+  ]);
 
   useEffect(() => {
-    fetchForecast();
-  }, [mainLocation.name, selectedVariable, horizonMonths, modelType]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || chatLoading) return;
-
-    const userText = inputMessage.trim();
-    setInputMessage('');
-    const newMessages = [
-      ...messages,
-      { role: 'user' as const, text: userText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-    ];
-    setMessages(newMessages);
-    setChatLoading(true);
-
-    try {
-      const res = await fetch('/api/explore/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: `[FORECAST INVESTIGATION FOR ${mainLocation.name}] Variable: ${selectedVariable}. Horizon: ${horizonMonths} months. User Question: ${userText}`,
-          region: {
-            name: mainLocation.name,
-            geometryType: 'point',
-            coordinates: mainLocation.coordinates,
-            center: mainLocation.coordinates,
-          },
-          variable: selectedVariable,
-        }),
-      });
-
-      const data = await res.json();
-      const latestPoint = forecast?.forecastPoints?.[
-        Math.min(horizonMonths - 1, (forecast?.forecastPoints?.length || 1) - 1)
-      ];
-      const reply =
-        data.answer ||
-        (forecast && latestPoint
-          ? `The ${modelType} forecast for ${selectedVariable} in ${mainLocation.name} projects ` +
-            `${latestPoint.predictedValue?.toFixed(3)} ${currentVar.unit} at the ${horizonMonths}-month horizon. ` +
-            `The 95% prediction interval spans ${latestPoint.confidenceLower95?.toFixed(3)} to ${latestPoint.confidenceUpper95?.toFixed(3)} ${currentVar.unit}. ` +
-            `Out-of-sample RMSE is ${forecast.validationMetrics?.rmse?.toFixed(3) ?? 'not reported'}.`
-          : `I can only discuss live-model output. No forecast is currently available for ${selectedVariable} at ${mainLocation.name}, so I will not invent projected values.`);
-
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', text: reply, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-      ]);
-    } catch (err) {
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          text: 'The forecast assistant is unreachable right now. No projected values are being shown rather than estimating them.',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const currentVar = EARTH_VARIABLES.find(v => v.id === selectedVariable) || EARTH_VARIABLES[0];
+    const controller = new AbortController();
+    void fetchForecast(controller.signal);
+    return () => controller.abort();
+  }, [fetchForecast]);
 
   return (
     <div className="mx-auto max-w-[1920px] px-3 sm:px-6 py-5 space-y-5">
@@ -183,16 +126,24 @@ export default function ForecastAIPage() {
               onChange={e => setSelectedVariable(e.target.value)}
               className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer pr-1"
             >
-              {EARTH_VARIABLES.map(v => (
-                <option key={v.id} value={v.id} className="bg-white text-slate-900">
-                  {v.name} ({v.unit})
-                </option>
+              {LIVE_VARIABLE_GROUPS.map(group => (
+                <optgroup key={group.id} label={group.label}>
+                  {group.variableIds.map(id => {
+                    const variable = getLiveVariable(id);
+                    if (!variable) return null;
+                    return (
+                      <option key={id} value={id} className="bg-white text-slate-900">
+                        {variable.name} ({variable.unit})
+                      </option>
+                    );
+                  })}
+                </optgroup>
               ))}
             </select>
           </div>
 
           <button
-            onClick={fetchForecast}
+            onClick={() => void fetchForecast()}
             disabled={loading}
             className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm transition-all"
           >
@@ -203,7 +154,7 @@ export default function ForecastAIPage() {
       </div>
 
       {/* Main Two-Panel Layout: Forecast Analytics (Left) + AI Forecast Chat (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-[calc(100vh-185px)] min-h-[640px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-[calc(100dvh-185px)] min-h-[520px]">
         {/* Left: Forecast Analytics Panel (8 cols) */}
         <div className="lg:col-span-8 h-full rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md flex flex-col justify-between overflow-y-auto space-y-4">
           {/* Parameter Tuning Bar */}
@@ -252,6 +203,9 @@ export default function ForecastAIPage() {
               </select>
             </div>
           </div>
+          <p className="-mt-2 px-1 text-[10px] text-slate-500">
+            Scenario is a planning context only; the current forecast API uses the selected statistical model and does not yet apply scenario forcing.
+          </p>
 
           {/* Interactive Forecast Chart */}
           <div className="flex-1 min-h-[300px] flex flex-col justify-between">
@@ -336,112 +290,20 @@ export default function ForecastAIPage() {
           </div>
         </div>
 
-        {/* Right: Integrated Forecast AI Chat Panel (4 cols) */}
-        <div className="lg:col-span-4 h-full rounded-3xl border border-slate-200/80 bg-white/95 flex flex-col justify-between overflow-hidden shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
-          {/* Chat Header */}
-          <div className="border-b border-slate-100 p-4 flex items-center justify-between bg-[#f8faf9]">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="text-xs font-bold text-slate-900">Forecast AI Detective</h3>
-                <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Ground Truth Context Active
-                </span>
-              </div>
-            </div>
-            <div className="text-[10px] font-mono text-slate-500 font-medium truncate max-w-[120px]">
-              {mainLocation.name.split(',')[0]}
-            </div>
-          </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3.5">
-            {messages.map((m, idx) => (
-              <div
-                key={idx}
-                className={`flex gap-2.5 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {m.role === 'assistant' && (
-                  <div className="h-7 w-7 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shrink-0 mt-0.5">
-                    <Bot className="h-4 w-4" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
-                    m.role === 'user'
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
-                      : 'border border-slate-200 bg-[#f8faf9] text-slate-800 shadow-xs'
-                  }`}
-                >
-                  <p>{m.text}</p>
-                  <div
-                    className={`mt-1.5 text-[9px] font-mono ${
-                      m.role === 'user' ? 'text-orange-100 text-right' : 'text-slate-400'
-                    }`}
-                  >
-                    {m.time}
-                  </div>
-                </div>
-                {m.role === 'user' && (
-                  <div className="h-7 w-7 rounded-xl bg-orange-100 border border-orange-300 flex items-center justify-center text-orange-800 shrink-0 mt-0.5">
-                    <User className="h-4 w-4" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {chatLoading && (
-              <div className="flex gap-2.5">
-                <div className="h-7 w-7 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-3 text-xs text-slate-500 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                  Computing model likelihood &amp; seasonal confidence...
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Chat Quick Prompts */}
-          <div className="px-3.5 py-2 border-t border-slate-100 bg-[#f8faf9] flex items-center gap-2 overflow-x-auto scrollbar-none">
-            <button
-              type="button"
-              onClick={() => setInputMessage(`What are the primary climate risks projected for ${mainLocation.name} in the next 24 months?`)}
-              className="rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:text-slate-900 shadow-xs whitespace-nowrap"
-            >
-              Future Climate Risks?
-            </button>
-            <button
-              type="button"
-              onClick={() => setInputMessage(`How reliable is the 95% confidence interval for ${selectedVariable}?`)}
-              className="rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:text-slate-900 shadow-xs whitespace-nowrap"
-            >
-              CI Confidence Analysis?
-            </button>
-          </div>
-
-          {/* Chat Input */}
-          <form onSubmit={handleSendMessage} className="p-3.5 border-t border-slate-100 bg-white">
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={e => setInputMessage(e.target.value)}
-                placeholder="Ask Forecast AI about future trends, scenarios or risks..."
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8faf9] px-4 py-2.5 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none pr-10 shadow-inner"
-              />
-              <button
-                type="submit"
-                disabled={!inputMessage.trim() || chatLoading}
-                className="absolute right-1.5 p-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 disabled:opacity-40 shadow-sm transition-all"
-              >
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </form>
+        {/* Right: shared Earth Science AI chat panel */}
+        <div className="h-[75dvh] min-h-[320px] lg:col-span-4 lg:h-[86%] lg:max-h-[560px] lg:min-h-[360px] lg:self-center">
+          <ExploreChatPanel
+            mode="forecast"
+            region={region}
+            variable={selectedVariable}
+            variableName={currentVar.name}
+            variableUnit={currentVar.unit}
+            radiusKm={radiusKm}
+            isRadiusLocked={isRadiusLocked}
+            horizonMonths={horizonMonths}
+            modelType={modelType}
+            forecast={forecast}
+          />
         </div>
       </div>
     </div>
