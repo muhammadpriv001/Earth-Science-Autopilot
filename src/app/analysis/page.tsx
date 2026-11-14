@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { InteractiveTimeSeriesChart } from '@/components/charts/InteractiveTimeSeriesChart';
 import { StatisticalSummaryCard } from '@/components/research/StatisticalSummaryCard';
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function AnalysisPage() {
+function AnalysisContent() {
   const searchParams = useSearchParams();
   const preset = searchParams.get('preset');
   const variableParam = searchParams.get('variable') || 'air-temperature';
@@ -232,6 +232,19 @@ export default function AnalysisPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function AnalysisPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center text-slate-400">
+        <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-cyan-400" />
+        <p>Loading Earth Observation trend analysis environment...</p>
+      </div>
+    }>
+      <AnalysisContent />
+    </Suspense>
   );
 }
 

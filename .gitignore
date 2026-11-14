@@ -19,6 +19,11 @@
 
 # production
 /build
+*.yaml
+*.yml
+*.yaml.example
+*.yml.example
+
 
 # misc
 .DS_Store

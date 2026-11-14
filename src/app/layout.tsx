@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en" className="dark scroll-smooth">
       <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-cyan-300 flex flex-col">
         <Navbar />
-        <main className="flex-1 w-full">{children}</main>
+        <main className="flex-1 w-full pt-2 sm:pt-4">{children}</main>
         <Footer />
       </body>
     </html>

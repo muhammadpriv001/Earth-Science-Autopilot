@@ -3,15 +3,17 @@
 // ==============================================================================
 // Converts natural language Earth-science inquiries into structured, verifiable
 // research plans with candidate datasets and statistical methodologies.
+// Integrates Groq Ultra-Fast Llama-3.3-70b AI with deterministic fallback.
 // ==============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { env } from '@/lib/env';
 import { EARTH_VARIABLES } from '@/lib/science/earth-variables';
+import { generateGroqResearchPlan } from '@/lib/science/groq-client';
 import { ResearchPlan, GeographicRegion } from '@/types';
 
 /**
- * Deterministic semantic research plan builder
+ * Deterministic semantic research plan builder (fallback)
  */
 function buildDeterministicPlan(query: string): ResearchPlan {
   const lower = query.toLowerCase();
@@ -151,13 +153,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate research plan
-    // If AI API key is configured, could invoke LLM; otherwise deterministic engine provides guaranteed verifiable output
+    const apiKey = env.AI_API_KEY || process.env.AI_API_KEY || '';
+
+    // 1. Try Groq AI plan generation if API key is present
+    if (apiKey) {
+      const groqPlan = await generateGroqResearchPlan(question, apiKey);
+      if (groqPlan) {
+        return NextResponse.json({
+          plan: groqPlan,
+          generator: 'Groq AI (Llama-3.3-70b-versatile)',
+        });
+      }
+    }
+
+    // 2. Deterministic Heuristic Fallback
     const plan = buildDeterministicPlan(question);
 
     return NextResponse.json({
       plan,
-      generator: env.AI_API_KEY ? 'Hybrid AI / Heuristic Engine' : 'Scientific Heuristic Planner',
+      generator: 'Scientific Heuristic Planner (Deterministic Mode)',
     });
   } catch (err: any) {
     return NextResponse.json(
@@ -166,4 +180,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
