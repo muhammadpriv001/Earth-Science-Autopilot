@@ -28,7 +28,7 @@ import {
   calculateVCI,
   analyzeFireRecovery,
 } from '@/lib/science/vegetation';
-import { calculateMannKendallTest } from '@/lib/science/mann-kendall';
+import { mannKendallTest } from '@/lib/science/mann-kendall';
 import { calculateSensSlope } from '@/lib/science/sens-slope';
 import { calculateLinearRegression } from '@/lib/science/statistics';
 import { InteractiveTimeSeriesChart } from '@/components/charts/InteractiveTimeSeriesChart';
@@ -43,11 +43,12 @@ export default function VegetationWorkspacePage() {
 
   const dataset = activeBenchmark === 'sahel' ? SAHEL_VEGETATION_BENCHMARK : CALIFORNIA_FIRE_RECOVERY_BENCHMARK;
   const values = dataset.observations.map(o => o.value);
+  const timeIndices = values.map((_, i) => i);
 
   // 1. Trend Analysis
-  const mkResult = calculateMannKendallTest(values);
-  const sensSlope = calculateSensSlope(values);
-  const linReg = calculateLinearRegression(values);
+  const mkResult = mannKendallTest(values);
+  const sensSlope = calculateSensSlope(timeIndices, values);
+  const linReg = calculateLinearRegression(timeIndices, values);
 
   const annualSlope = sensSlope.medianSlope * 12; // monthly to annual
   const isGreening = annualSlope > 0 && mkResult.pValue < 0.05;
@@ -216,7 +217,7 @@ export default function VegetationWorkspacePage() {
           {/* Time Series Chart */}
           <InteractiveTimeSeriesChart
             dataset={dataset}
-            trendResult={{
+            trend={{
               linearSlopePerYear: parseFloat(annualSlope.toFixed(4)),
               linearIntercept: linReg.intercept,
               rSquared: linReg.rSquared,
@@ -229,7 +230,10 @@ export default function VegetationWorkspacePage() {
               significanceThreshold: 0.05,
               trendDirection: isGreening ? 'INCREASING' : isBrowning ? 'DECREASING' : 'NO_TREND',
               sensSlopePerYear: parseFloat(annualSlope.toFixed(4)),
-              sensSlopeConfidenceInterval: [sensSlope.confidenceLower * 12, sensSlope.confidenceUpper * 12],
+              sensSlopeConfidenceInterval: [
+                sensSlope.confidenceInterval[0] * 12,
+                sensSlope.confidenceInterval[1] * 12,
+              ],
               totalObservations: values.length,
               validObservations: values.length,
               missingObservations: 0,

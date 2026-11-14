@@ -53,18 +53,32 @@ export default function LandingPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/explore"
-            className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-semibold text-slate-200 hover:bg-slate-800 hover:text-white transition-colors"
+            href="/domains"
+            className="flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-950/30 px-6 py-3.5 text-sm font-semibold text-cyan-300 hover:bg-cyan-900/40 hover:text-white transition-colors"
           >
             <Globe2 className="h-4 w-4 text-cyan-400" />
-            Explore Global Map
+            11 Earth Domains
           </Link>
           <Link
-            href="/analysis"
-            className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-semibold text-slate-200 hover:bg-slate-800 hover:text-white transition-colors"
+            href="/vegetation"
+            className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-6 py-3.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/40 hover:text-white transition-colors"
           >
-            <BarChart3 className="h-4 w-4 text-cyan-400" />
-            Time-Series Lab
+            <TrendingUp className="h-4 w-4 text-emerald-400" />
+            Vegetation Intelligence
+          </Link>
+          <Link
+            href="/prediction"
+            className="flex items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-950/30 px-6 py-3.5 text-sm font-semibold text-purple-300 hover:bg-purple-900/40 hover:text-white transition-colors"
+          >
+            <Cpu className="h-4 w-4 text-purple-400" />
+            Forecasting Engine
+          </Link>
+          <Link
+            href="/cross-domain"
+            className="flex items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-950/30 px-6 py-3.5 text-sm font-semibold text-blue-300 hover:bg-blue-900/40 hover:text-white transition-colors"
+          >
+            <GitCompare className="h-4 w-4 text-blue-400" />
+            Cross-Domain Analysis
           </Link>
         </div>
 
@@ -143,22 +157,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6 EARTH SYSTEMS PREVIEW */}
+      {/* 11 EARTH SYSTEMS PREVIEW */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 border-t border-slate-900">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-white">
-              Earth System Variable Library
+              11 Earth-System Domains & 22 Peer-Reviewed Variables
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Curated variables with units, measurement principles, and satellite sensor lineage
+              Curated variables across all 11 scientific domains with physical units, measurement principles, and satellite sensor lineage
             </p>
           </div>
           <Link
-            href="/variables"
+            href="/domains"
             className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
           >
-            View all {EARTH_VARIABLES.length} variables <ArrowRight className="h-3.5 w-3.5" />
+            Explore all 11 domains & {EARTH_VARIABLES.length} variables <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 

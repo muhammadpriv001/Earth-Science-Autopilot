@@ -40,30 +40,30 @@ Users can formulate environmental research hypotheses in natural English (e.g. *
 | Module | Route | Purpose |
 | :--- | :--- | :--- |
 | **Landing Page** | `/` | Platform introduction, NASA challenge banner, guided investigations |
-| **Research Dashboard** | `/dashboard` | Central research hub, live data provider health, recent analyses |
-| **Global GIS Explorer** | `/explore` | Map coordinate search, point & bounding box selection |
-| **Variable Library** | `/variables` | 15+ curated Earth variables with units, principles, and limitations |
-| **Dataset Discovery** | `/datasets` | Live NASA CMR & NOAA dataset search, platform/sensor filtering |
-| **Research Autopilot** | `/autopilot` | AI / Heuristic natural-language question planner |
-| **Time-Series Lab** | `/analysis` | Interactive time-series plotting, Mann-Kendall statistics, CSV export |
+| **Global GIS Explorer & AI** | `/explore` | Integrated Leaflet + OSM / ESRI Dark map with click geocoding & live AI chat research panel |
+| **11 Earth-System Domains** | `/domains` | Complete coverage across 11 Earth domains and 22 curated scientific variables |
+| **Vegetation Intelligence** | `/vegetation` | 6 specialized sub-labs: Trends, Phenology (SOS/POS/EOS), VCI Drought, Fire Recovery, Forest & Biomass, Crop Monitoring |
+| **Prediction Engine** | `/prediction` | Holt-Winters exponential smoothing, seasonal naive baseline, chronological backtest, 80%/95% confidence intervals |
+| **Cross-Domain Analysis** | `/cross-domain` | Lead-lag cross-correlation (-6 to +6 months), Pearson $r$, Spearman $\rho$, and OLS scatter regression |
+| **Time-Series Lab** | `/analysis` | Interactive time-series plotting, Mann-Kendall statistics, Sen's slope, CSV export |
 | **Regional Comparison** | `/compare` | Dual-region trend divergence analysis (e.g. warming vs. cooling) |
+| **Research Dashboard** | `/dashboard` | Central research hub, live data provider health, recent analyses |
+| **Dataset Discovery** | `/datasets` | Live NASA CMR & NOAA dataset search, platform/sensor filtering |
 | **Resources Directory**| `/resources` | Comprehensive catalog of NASA, CSA, NOAA, and statistical tools |
 | **Project Workspace** | `/projects` | Saved research projects and reproducible runs |
-| **Individual Project** | `/projects/[id]`| Project details, research question, and findings |
 | **Scientific Reports** | `/reports/[id]` | Formal PDF/printable research reports with citations |
 | **Platform Settings** | `/settings` | API token configuration (NOAA CDO, Earthdata, Gemini) |
-| **Sign In** | `/auth/sign-in` | Supabase authentication sign-in (guest local mode supported) |
-| **Sign Up** | `/auth/sign-up` | New researcher registration |
 
 ---
 
 ## 3. Technology Stack
 
 - **Framework:** Next.js (App Router), React 19, TypeScript.
-- **Styling & UI:** Tailwind CSS, Lucide Icons, scientific space theme.
-- **Geospatial & Mapping:** MapLibre GL JS, Turf.js, OpenStreetMap Nominatim geocoding.
-- **Visualizations:** High-performance SVG dynamic charting with trendlines, confidence bands, and tooltips.
-- **Database & Auth:** Supabase PostgreSQL, Row Level Security (RLS), Supabase Auth.
+- **Styling & UI:** Tailwind CSS, Lucide Icons, scientific dark space theme.
+- **Geospatial & Mapping:** Leaflet, OpenStreetMap, ESRI Dark Gray Canvas, OpenStreetMap Nominatim reverse geocoding (zero API keys required).
+- **Scientific & Statistical Engine:** Deterministic TypeScript algorithms for Mann-Kendall, Sen's slope, Holt-Winters forecasting, Pearson/Spearman correlation, Land Surface Phenology, and post-wildfire recovery trajectory.
+- **Visualizations:** High-performance responsive SVG dynamic charting with trendlines, confidence bands, and tooltips.
+- **Database & Auth:** Supabase PostgreSQL, Row Level Security (RLS), Supabase Auth (guest local mode supported).
 - **Deployment:** Vercel serverless functions and edge runtime.
 
 ---
