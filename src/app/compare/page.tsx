@@ -171,7 +171,7 @@ export default function ComparePage() {
       </div>
 
       {/* SECONDARY LOCATION SELECTOR BAR: Pure White Neomorphic Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
+      <div className="relative z-50 grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
         {/* Primary Region A Display (Inherited from Main Location Selector) */}
         <div className="lg:col-span-5 rounded-2xl border border-teal-200/80 bg-[#f8faf9] p-4 space-y-1">
           <div className="flex items-center justify-between text-xs">
@@ -227,7 +227,7 @@ export default function ComparePage() {
 
             {/* Dropdown Suggestions for Secondary Location */}
             {dropdownOpenB && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-slate-200 bg-white shadow-2xl backdrop-blur-2xl overflow-hidden z-[130] max-h-60 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-slate-200 bg-white shadow-2xl backdrop-blur-2xl overflow-hidden z-[100] max-h-60 overflow-y-auto">
                 {isSearchingB ? (
                   <div className="p-3 text-center text-xs text-orange-600 flex items-center justify-center gap-2">
                     <span className="h-3.5 w-3.5 rounded-full border-2 border-orange-600 border-t-transparent animate-spin" />

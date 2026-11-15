@@ -40,9 +40,9 @@ import { GibsImage } from '@/components/imagery/GibsImage';
 
 const ANALYSIS_CATEGORIES = [
   { id: 'all', label: 'All Categories', icon: Layers },
-  { id: 'vegetation', label: 'Vegetation & Biosphere', icon: Trees },
   { id: 'climate', label: 'Atmosphere & Climate', icon: CloudSun },
-  { id: 'water', label: 'Precipitation & Hydrology', icon: Droplets },
+  { id: 'water', label: 'Water & Soil Moisture', icon: Droplets },
+  { id: 'cryosphere', label: 'Cryosphere & Sea Ice', icon: Snowflake },
   { id: 'cross-domain', label: 'Cross-Domain Coupling', icon: Activity },
 ];
 
@@ -53,6 +53,27 @@ function AnalysisContent() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedVariable, setSelectedVariable] = useState<string>('air-temperature');
+
+  // Only the live-backed variables can be analysed. The category tabs filter
+  // this list so the dropdown always matches what the API can actually plot.
+  const categoryVariableIds =
+    selectedCategory === 'all' || selectedCategory === 'cross-domain'
+      ? LIVE_VARIABLE_IDS
+      : LIVE_VARIABLE_GROUPS.find(group => group.id === selectedCategory)
+          ?.variableIds ?? LIVE_VARIABLE_IDS;
+
+  const handleSelectCategory = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+
+    if (categoryId !== 'all' && categoryId !== 'cross-domain') {
+      const group = LIVE_VARIABLE_GROUPS.find(g => g.id === categoryId);
+      const firstVariable = group?.variableIds[0];
+
+      if (firstVariable && !group?.variableIds.includes(selectedVariable as never)) {
+        setSelectedVariable(firstVariable);
+      }
+    }
+  };
   const [startDate, setStartDate] = useState('1994-01-01');
   const [endDate, setEndDate] = useState('2024-12-31');
   const [loading, setLoading] = useState(false);
@@ -240,7 +261,7 @@ function AnalysisContent() {
           return (
             <button
               key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+              onClick={() => handleSelectCategory(cat.id)}
               className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all ${
                 isActive
                   ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white shadow-md shadow-emerald-500/20'
@@ -255,7 +276,7 @@ function AnalysisContent() {
       </div>
 
       {/* SECTION 1: MAIN TIME-SERIES LAB & CONTROLS */}
-      {(selectedCategory === 'all' || selectedCategory === 'vegetation' || selectedCategory === 'climate' || selectedCategory === 'water') && (
+      {(selectedCategory === 'all' || selectedCategory === 'climate' || selectedCategory === 'water' || selectedCategory === 'cryosphere') && (
         <section className="space-y-4">
           {/* Controls Bar: Clean White Neomorphic Container */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5 rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
@@ -268,11 +289,14 @@ function AnalysisContent() {
                 onChange={e => setSelectedVariable(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-[#f8faf9] p-2 text-xs font-semibold text-slate-800 focus:border-emerald-500 focus:bg-white focus:outline-none"
               >
-                {EARTH_VARIABLES.map(v => (
-                  <option key={v.id} value={v.id}>
-                    {v.name} ({v.unit})
-                  </option>
-                ))}
+                {categoryVariableIds.map(id => {
+                  const variable = getLiveVariable(id);
+                  return (
+                    <option key={id} value={id}>
+                      {variable ? `${variable.name} (${variable.unit})` : id}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
