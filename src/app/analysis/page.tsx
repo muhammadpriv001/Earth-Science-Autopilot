@@ -29,8 +29,14 @@ import {
   Clock,
   ShieldCheck,
   Eye,
+  Snowflake,
+  Satellite,
 } from 'lucide-react';
 import Link from 'next/link';
+
+import { LIVE_VARIABLE_IDS, LIVE_VARIABLE_GROUPS, getLiveVariable } from '@/lib/science/live-capabilities';
+import { getAllEpochImagery, getEpochImagery, IMAGERY_EPOCHS, EpochImagery } from '@/lib/providers/imagery';
+import { GibsImage } from '@/components/imagery/GibsImage';
 
 const ANALYSIS_CATEGORIES = [
   { id: 'all', label: 'All Categories', icon: Layers },
@@ -54,6 +60,7 @@ function AnalysisContent() {
 
   // Time-stamped imagery epoch comparator
   const [imageryEpoch, setImageryEpoch] = useState<'historical' | 'intermediate' | 'recent'>('recent');
+  const [radiusKm, setRadiusKm] = useState(100);
 
   // Datasets and results
   const [dataset, setDataset] = useState<TimeSeriesDataset | null>(null);
@@ -62,6 +69,17 @@ function AnalysisContent() {
 
   // Cross domain result
   const [crossDomainResult, setCrossDomainResult] = useState<CrossDomainCorrelationResult | null>(null);
+
+  // Imagery data
+  const [imageryData, setImageryData] = useState<EpochImagery[] | null>(null);
+
+  // Fetch imagery when location or epoch changes
+  useEffect(() => {
+    setImageryData(null); // reset while computing
+    const center = mainLocation.coordinates;
+    const imagery = getAllEpochImagery(center, radiusKm);
+    setImageryData(imagery);
+  }, [mainLocation.name, mainLocation.coordinates, imageryEpoch, radiusKm]);
 
   // Fetch Time Series and Trend
   const runAnalysis = async () => {
@@ -384,17 +402,33 @@ function AnalysisContent() {
           </div>
         </div>
 
-        {/* Visual Difference Viewer Cards */}
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-[#f8faf9] p-6 text-center space-y-2">
-          <Eye className="h-7 w-7 text-slate-400 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-800">Imagery mosaics are not connected</h3>
-          <p className="text-xs text-slate-500 max-w-xl mx-auto leading-relaxed">
-            Landsat, MODIS and Sentinel-2 surface-reflectance composites require an authenticated NASA
-            Earthdata / Copernicus download. Rather than showing simulated NDVI values or stylised
-            placeholder scenes, this panel reports that the imagery layer is unavailable. Use the
-            NASA POWER and NSIDC time-series panels above for measured trends.
-          </p>
-        </div>
+        {/* Imagery Display */}
+        {imageryData ? (
+          <div className="grid grid-cols-3 gap-4">
+            {imageryData.map((img, i) => (
+              <div key={img.epoch.id} className="rounded-xl border p-3 bg-white/95">
+                <img
+                  src={img.trueColorUrl}
+                  alt={`True-color ${img.epoch.shortLabel} imagery`}
+                  loading="lazy"
+                  className="w-full h-48 object-cover rounded-t-xl"
+                />
+                <div className="p-2 text-xs font-bold text-emerald-800">
+                  True Color ({img.epoch.shortLabel})
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-[#f8faf9] p-6 text-center space-y-2">
+            <Eye className="h-7 w-7 text-slate-400 mx-auto" />
+            <h3 className="text-sm font-bold text-slate-800">Imagery mosaics are not connected</h3>
+            <p className="text-xs text-slate-500 max-w-xl mx-auto leading-relaxed">
+              Landsat, MODIS and Sentinel-2 surface-reflectance composites require an authenticated NASA
+              Earthdata / Copernicus download.
+            </p>
+          </div>
+        )}
       </section>
 
       {/* SECTION 3: VEGETATION & BIOSPHERE COMPREHENSIVE SUB-LABS */}

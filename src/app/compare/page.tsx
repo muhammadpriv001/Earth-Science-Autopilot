@@ -24,6 +24,8 @@ import {
   Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
+import { LIVE_VARIABLE_IDS, LIVE_VARIABLE_GROUPS, getLiveVariable, isLiveVariableId } from '@/lib/science/live-capabilities';
+import { getAllEpochImagery, GIBS_WMS_ENDPOINT } from '@/lib/providers/imagery';
 
 const PRESET_LOCATIONS_B = [
   { name: 'Northern Hemisphere Arctic Ocean', coords: [0.0, 85.0] as [number, number] },
@@ -196,11 +198,10 @@ export default function ComparePage() {
                   key={i}
                   type="button"
                   onClick={() => handleSelectPresetB(p)}
-                  className={`rounded-xl px-2.5 py-1 text-[10px] font-bold transition-all ${
-                    secondaryLocation.name.includes(p.name.split(',')[0])
-                      ? 'bg-orange-500 text-white shadow-sm'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 shadow-xs'
-                  }`}
+                  className={`rounded-xl px-2.5 py-1 text-[10px] font-bold transition-all ${secondaryLocation.name.includes(p.name.split(',')[0])
+                    ? 'bg-orange-500 text-white shadow-sm'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 shadow-xs'
+                    }`}
                 >
                   {p.name.split(',')[0]}
                 </button>
@@ -281,6 +282,36 @@ export default function ComparePage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* VARIABLE SELECTOR */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-4 mb-4 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+          <Activity className="h-3.5 w-3.5 text-emerald-600" />
+          <span>Variable</span>
+        </div>
+        <select
+          value={selectedVariable}
+          onChange={e => setSelectedVariable(e.target.value)}
+          className="cursor-pointer bg-transparent pr-1 rounded text-xs font-bold text-slate-800 focus:outline-none"
+        >
+          {LIVE_VARIABLE_GROUPS.map(group => (
+            <optgroup key={group.id} label={group.shortLabel}>
+              {group.variableIds.map(variableId => {
+                const variable = getLiveVariable(variableId);
+                return (
+                  <option
+                    key={variableId}
+                    value={variableId}
+                    disabled={!isLiveVariableId(variableId)}
+                  >
+                    {variable ? `${variable.name} (${variable.unit})` : variableId}
+                  </option>
+                );
+              })}
+            </optgroup>
+          ))}
+        </select>
       </div>
 
       {/* SECTION 1: MULTI-VARIABLE DIVERGENCE CHART & STATISTICS */}
@@ -410,15 +441,71 @@ export default function ComparePage() {
         <div className="rounded-2xl border border-dashed border-slate-300 bg-[#f8faf9] p-5 space-y-2">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
             <Eye className="h-4 w-4 text-amber-500" />
-            Satellite visual comparator is not connected
+            Satellite imagery
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Region A ({mainLocation.name}) and Region B ({secondaryLocation.name}) surface-reflectance
-            mosaics require an authenticated NASA Earthdata or Copernicus download. No imagery or
-            interpreted land-cover change is shown until that connection is configured.
-          </p>
+          {mainLocation.center && secondaryLocation.center ? (
+            <div className="grid grid-cols-2 gap-4">
+              {['historical', 'intermediate', 'recent'].map(epochId => {
+                const mainImagery = getAllEpochImagery(mainLocation.center, mainLocation.radiusKm || 100);
+                const secondaryCenter = secondaryLocation.coordinates ?? mainLocation.coordinates;
+                const secondaryRadius = secondaryLocation.radiusKm ?? (mainLocation.radiusKm || 100);
+                const secondaryImagery = getAllEpochImagery(secondaryCenter, secondaryRadius);
+                const epochMain = mainImagery.find(e => e.id === epochId);
+                const epochSecondary = secondaryImagery.find(e => e.id === epochId);
+                return (
+                  <div key={epochId} className="rounded-xl border border-slate-200 p-3 hover:border-emerald-400 transition-colors">
+                    <div className="text-xs font-bold text-slate-600">Region A ({mainLocation.name})</div>
+                    <a
+                      href={epochMain?.trueColorUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md p-2 bg-white/50 text-sm text-slate-500 hover:bg-white/80 transition-colors"
+                    >
+                      True Color
+                    </a>
+                    <div className="my-2">
+                      <img
+                        src={epochMain?.ndviUrl || '/placeholder.svg'}
+                        alt={`NDVI ${epochId} Region A`}
+                        className="w-full h-32 object-cover rounded-md"
+                      />
+                    </div>
+                    {epochSecondary && (
+                      <>
+                        <div className="mt-2 text-xs font-bold text-slate-600">
+                          Region B ({secondaryLocation.name})
+                        </div>
+
+                        <a
+                          href={epochSecondary.trueColorUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-md p-2 bg-white/50 text-sm text-slate-500 hover:bg-white/80 transition-colors"
+                        >
+                          True Color
+                        </a>
+
+                        <div className="my-2">
+                          <img
+                            src={epochSecondary.ndviUrl || '/placeholder.svg'}
+                            alt={`NDVI ${epochId} Region B`}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500">
+              Select regions to enable satellite visual comparison
+            </p>
+          )}
         </div>
       </section>
+
     </div>
   );
 }
