@@ -1,4 +1,5 @@
 # The Earth Science Autopilot
+<a href="https://earth-science-autopilot.vercel.app/">Live Application Link</a>
 
 <div align="center">
 
