@@ -1,0 +1,84 @@
+name: Supabase weekly keep-alive
+
+on:
+  schedule:
+    # Primary weekly ping: every Monday at 06:00 UTC.
+    - cron: '0 6 * * 1'
+    # Safety net: a second ping on Thursday so a delayed/paused runner can
+    # never leave the free-tier database idle for a full 7 days.
+    - cron: '0 6 * * 4'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    name: Ping Supabase and record heartbeat
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Resolve Supabase credentials
+        id: creds
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL || vars.SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
+            echo "::error::Missing Supabase credentials. Add SUPABASE_URL and SUPABASE_ANON_KEY as repository secrets (or Actions variables)."
+            exit 1
+          fi
+          echo "url=${SUPABASE_URL%/}" >> "$GITHUB_OUTPUT"
+
+      - name: Ping database (prevents free-tier pause)
+        env:
+          SUPABASE_URL: ${{ steps.creds.outputs.url }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          # Any query that reaches Postgres counts as project activity. This
+          # selects a single row from an existing table so RLS returning an
+          # empty array is still a successful, real database round-trip.
+          url="${SUPABASE_URL}/rest/v1/profiles?select=id&limit=1"
+          http_code=$(curl -sS -o /tmp/supabase-body.json -w '%{http_code}' \
+            --retry 3 --retry-delay 5 --max-time 30 \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Accept: application/json" \
+            "${url}")
+          echo "Supabase responded with HTTP ${http_code}"
+          cat /tmp/supabase-body.json || true
+          case "${http_code}" in
+            200|204|206) echo "Database ping successful." ;;
+            *)
+              echo "::error::Supabase ping failed with HTTP ${http_code}."
+              exit 1
+              ;;
+          esac
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Record heartbeat commit
+        # Monday (or a manual run) writes the commit, so the contribution
+        # graph gets exactly one green square per week authored by the owner.
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 6 * * 1'
+        run: |
+          mkdir -p .github/keepalive
+          printf '%s Supabase keep-alive OK\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            >> .github/keepalive/heartbeat.txt
+
+          git config user.name "Muhammad"
+          git config user.email "muhammad.priv001@gmail.com"
+          git add .github/keepalive/heartbeat.txt
+          git commit -m "chore(keepalive): weekly Supabase heartbeat [skip ci]" \
+            || echo "No heartbeat change to commit."
+
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

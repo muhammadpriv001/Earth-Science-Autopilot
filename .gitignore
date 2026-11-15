@@ -21,6 +21,8 @@
 /build
 *.yaml
 *.yml
+# GitHub Actions workflows are source code and must be tracked.
+!.github/workflows/*.yml
 *.yaml.example
 *.yml.example
 
