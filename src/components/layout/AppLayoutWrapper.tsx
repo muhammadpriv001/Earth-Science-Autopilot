@@ -6,6 +6,7 @@ import { TopLocationBar } from './TopLocationBar';
 import { Sidebar } from './Sidebar';
 import { PublicNavbar } from './PublicNavbar';
 import { Footer } from './Footer';
+import { MobileBottomNav } from './MobileBottomNav';
 
 export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,20 +17,26 @@ export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
 
   if (isLandingPage) {
     return (
-      <div className="min-h-screen bg-[#06211b] flex flex-col w-full">
-        <PublicNavbar />
-        <main className="flex-1 w-full">{children}</main>
+      <div className="flex min-h-dvh w-full flex-col bg-[#06211b]">
+        <div className="sticky top-0 z-50 hidden md:block">
+          <PublicNavbar />
+        </div>
+        <main className="w-full flex-1">{children}</main>
         <Footer />
+        <MobileBottomNav />
       </div>
     );
   }
 
   if (isAuthPage) {
     return (
-      <div className="min-h-screen bg-[#f8faf9] flex flex-col w-full">
-        <PublicNavbar />
-        <main className="flex-1 w-full flex items-center justify-center">{children}</main>
+      <div className="flex min-h-dvh w-full flex-col bg-[#f8faf9]">
+        <div className="sticky top-0 z-50 hidden md:block">
+          <PublicNavbar />
+        </div>
+        <main className="flex w-full flex-1 items-center justify-center">{children}</main>
         <Footer />
+        <MobileBottomNav />
       </div>
     );
   }
@@ -37,20 +44,21 @@ export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
   // PORTAL APPLICATION DOMAIN (/dashboard, /explore, /forecast, /analysis, /compare, /resources, /profile)
   // Consistently uses Dashboard V22 Theme: Deep Forest Green (#061d18), Clean White Neomorphism (#edf2ef canvas), Coral & Mint Accents
   return (
-    <div className="h-screen bg-[#edf2ef] flex flex-col w-full overflow-hidden text-slate-800">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#edf2ef] text-slate-800">
       {/* Top Location & Locus Bar (Deep Forest Green & Glassmorphism) */}
       <TopLocationBar />
 
-      <div className="flex flex-1 h-[calc(100vh-53px)] overflow-hidden">
-        {/* Left Vertical Portal Sidebar Navigation (Fixed in place, never scrolls away) */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Left Vertical Portal Sidebar Navigation (desktop/tablet only) */}
         <Sidebar />
 
         {/* Portal Page Main Content Area (Scrolls independently while sidebar stays pinned) */}
-        <main className="flex-1 min-w-0 h-full flex flex-col bg-[#edf2ef] text-slate-800 overflow-y-auto">
-          <div className="flex-1 w-full">{children}</div>
+        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-[#edf2ef] text-slate-800">
+          <div className="w-full flex-1">{children}</div>
           <Footer />
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

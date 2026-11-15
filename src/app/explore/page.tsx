@@ -132,7 +132,7 @@ export default function ExplorePage() {
   const regionCenter = selectedRegion.center ?? selectedRegion.coordinates;
 
   return (
-    <div className="mx-auto max-w-[1920px] space-y-4 px-3 py-4 sm:px-6">
+    <div className="mx-auto max-w-[1920px] space-y-4 px-3 py-3 sm:px-6 sm:py-4">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300 bg-emerald-100 text-emerald-800">
@@ -152,12 +152,12 @@ export default function ExplorePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
-            <Sliders className="h-4 w-4 text-emerald-600" />
+          <div className="flex min-w-0 max-w-[11rem] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-xs">
+            <Sliders className="h-4 w-4 shrink-0 text-emerald-600" />
             <select
               value={selectedCategory}
               onChange={event => handleCategoryChange(event.target.value)}
-              className="cursor-pointer bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
+              className="w-full min-w-0 cursor-pointer truncate bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
               aria-label="Earth-system category"
             >
               <option value="all">All live categories</option>
@@ -167,12 +167,12 @@ export default function ExplorePage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
-            <Layers className="h-4 w-4 text-emerald-600" />
+          <div className="flex min-w-0 max-w-[13rem] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-xs">
+            <Layers className="h-4 w-4 shrink-0 text-emerald-600" />
             <select
               value={selectedVariable}
               onChange={event => setSelectedVariable(event.target.value)}
-              className="cursor-pointer bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
+              className="w-full min-w-0 cursor-pointer truncate bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
               aria-label="Live variable"
             >
               {categoryVariables.map(variable => (
@@ -185,7 +185,7 @@ export default function ExplorePage() {
 
           <Link
             href={`/analysis?variable=${selectedVariable}&lat=${regionCenter[1] ?? 31.5204}&lng=${regionCenter[0] ?? 74.3587}`}
-            className="flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500"
+            className="flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500"
           >
             <Sparkles className="h-4 w-4" />
             Investigate Analytics
@@ -194,7 +194,7 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:h-[calc(100dvh-175px)] lg:min-h-[520px] lg:grid-cols-12">
+      <div className="workspace-explore grid grid-cols-1 gap-4 lg:grid-cols-12">
         <div className="h-[56vh] min-h-[300px] overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] lg:col-span-8 lg:h-full lg:min-h-0">
           <MapLibreMap
             selectedRegion={selectedRegion}

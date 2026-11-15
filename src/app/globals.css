@@ -3,6 +3,17 @@
 :root {
   --background: #061d18;
   --foreground: #f8fafc;
+  --mobile-nav-height: 4.5rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Never allow the document itself to pan sideways on phones. `clip` is used
+     instead of `hidden` so sticky/fixed positioning keeps working. */
+  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
@@ -10,6 +21,96 @@ body {
   color: #f8fafc;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
+  min-height: 100dvh;
+}
+
+/* Media can never force a page wider than its viewport. */
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* =========================================================
+   MOBILE APP SHELL
+   Frosted bottom navigation pill + safe-area aware spacing.
+   Desktop navigation stays visible from md and above.
+   ========================================================= */
+
+.mobile-nav-shell {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 160;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: min(28rem, calc(100vw - 1.5rem));
+  pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+  .mobile-nav-shell {
+    display: none;
+  }
+}
+
+/* Keeps page content and the footer clear of the fixed mobile pill. */
+.mobile-nav-spacer {
+  padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .mobile-nav-spacer {
+    padding-bottom: 0;
+  }
+}
+
+/* Full-height analytical workspaces (desktop only). Mobile stacks naturally. */
+.workspace-explore,
+.workspace-forecast {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .workspace-explore {
+    height: calc(100dvh - 190px);
+    min-height: 520px;
+  }
+
+  .workspace-forecast {
+    height: calc(100dvh - 205px);
+    min-height: 520px;
+  }
+}
+
+/* Native controls must respect the phone viewport. */
+select,
+input,
+textarea {
+  max-width: 100%;
+}
+
+select {
+  text-overflow: ellipsis;
+}
+
+/* Hero ribbon is replaced by the mobile pill on small screens. */
+@media (max-width: 639px) {
+  .featured-ribbon-shell {
+    display: none;
+  }
+}
+
+/* Touch devices do not benefit from hover lifts. */
+@media (hover: none) {
+  .v22-card:hover,
+  .v22-card-dark:hover {
+    transform: none;
+  }
 }
 
 /* Hide scrollbars globally across all browsers while retaining scroll functionality */

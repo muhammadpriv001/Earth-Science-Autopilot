@@ -31,7 +31,6 @@ const QUICK_PRESETS = [
   { name: 'Lahore, Pakistan', coords: [74.3587, 31.5204] as [number, number], radius: 50 },
   { name: 'Amazon Basin, Brazil', coords: [-57.5, -10.0] as [number, number], radius: 250 },
   { name: 'Arctic Ocean', coords: [0.0, 85.0] as [number, number], radius: 500 },
-  { name: 'Sahel Belt, Africa', coords: [15.0, 14.5] as [number, number], radius: 200 },
   { name: 'California, USA', coords: [-121.5, 38.5] as [number, number], radius: 100 },
 ];
 
@@ -145,10 +144,10 @@ export function TopLocationBar() {
 
   return (
     <>
-      <div className="w-full bg-[#06211b] border-b border-emerald-900/60 backdrop-blur-xl sticky top-0 z-[120] px-3 sm:px-6 py-2 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-        <div className="mx-auto max-w-6xl flex flex-wrap md:flex-nowrap items-center justify-center gap-2">
+      <div className="sticky top-0 z-[120] w-full border-b border-emerald-900/60 bg-[#06211b] px-2.5 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-all sm:px-6">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 md:flex-nowrap md:justify-center">
           {/* LEFT: Main Location Search Bar (Google Maps style) */}
-          <div className="flex-1 min-w-0 max-w-md relative" ref={searchRef}>
+          <div className="relative order-1 min-w-0 flex-1 md:max-w-md" ref={searchRef}>
             <div className="relative flex items-center rounded-xl border border-emerald-500/30 bg-[#0b2b23]/90 shadow-inner hover:border-emerald-400/60 focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400/40 transition-all">
               <div className="pl-3 pr-2 text-emerald-400 flex items-center">
                 <Search className="h-4 w-4" />
@@ -203,11 +202,10 @@ export function TopLocationBar() {
                           setRadiusKm(km);
                           setRadiusDropdownOpen(false);
                         }}
-                        className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-xs text-left transition-colors ${
-                          mainLocation.radiusKm === km
+                        className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-xs text-left transition-colors ${mainLocation.radiusKm === km
                             ? 'bg-emerald-500/20 text-emerald-300 font-bold'
                             : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        }`}
+                          }`}
                       >
                         <span>{km} km</span>
                         {mainLocation.radiusKm === km && <Check className="h-3 w-3 text-emerald-300" />}
@@ -221,11 +219,10 @@ export function TopLocationBar() {
               <button
                 type="button"
                 onClick={toggleRadiusLock}
-                className={`p-2 mr-1 rounded-lg transition-colors ${
-                  mainLocation.isRadiusLocked
+                className={`p-2 mr-1 rounded-lg transition-colors ${mainLocation.isRadiusLocked
                     ? 'text-amber-400 bg-amber-400/10'
                     : 'text-slate-400 hover:text-white'
-                }`}
+                  }`}
                 title={mainLocation.isRadiusLocked ? 'Radius locked' : 'Click to lock radius'}
               >
                 {mainLocation.isRadiusLocked ? (
@@ -303,7 +300,7 @@ export function TopLocationBar() {
           </div>
 
           {/* CENTER: Coordinates & Active Footprint Badge */}
-          <div className="hidden xl:flex items-center gap-2 font-mono text-xs shrink-0">
+          <div className="hidden xl:order-2 xl:flex items-center gap-2 font-mono text-xs shrink-0">
             <div className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900/60 px-2.5 py-1 text-slate-300">
               <span className="text-emerald-400">Lat:</span> {mainLocation.coordinates[1].toFixed(4)}°
               <span className="text-emerald-400 ml-1">Lng:</span> {mainLocation.coordinates[0].toFixed(4)}°
@@ -313,129 +310,130 @@ export function TopLocationBar() {
             </div>
           </div>
 
-          {/* RIGHT: Quick Presets, Save Button & User Profile Pill */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Quick Presets Pills (Medium+ screens) */}
-            <div className="hidden lg:flex items-center gap-1">
-              {QUICK_PRESETS.slice(0, 3).map((p, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleSelectPreset(p)}
-                  className={`rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
-                    mainLocation.name.includes(p.name.split(',')[0])
-                      ? 'bg-emerald-500/20 border border-emerald-400/40 text-emerald-300'
-                      : 'border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800'
+          {/* Quick Presets Pills (desktop only) */}
+          <div className="hidden items-center gap-1 lg:order-3 lg:ml-auto lg:flex">
+            {QUICK_PRESETS.slice(0, 3).map((p, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => handleSelectPreset(p)}
+                className={`rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${mainLocation.name.includes(p.name.split(',')[0])
+                    ? 'bg-emerald-500/20 border border-emerald-400/40 text-emerald-300'
+                    : 'border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800'
                   }`}
-                >
-                  {p.name.split(',')[0]}
-                </button>
-              ))}
-            </div>
+              >
+                {p.name.split(',')[0]}
+              </button>
+            ))}
+          </div>
 
-            {/* SAVE INVESTIGATION BUTTON: Warm Orange CTA */}
+          {/* SAVE INVESTIGATION BUTTON: full-width second row on phones (authenticated researchers only) */}
+          {isAuthenticated && (
             <button
               type="button"
               onClick={handleTriggerSave}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:to-amber-500 text-white px-3.5 py-1.5 text-xs font-bold shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02]"
+              className="order-3 flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500 md:order-4 md:ml-auto md:w-auto md:px-3.5 lg:ml-0"
               title="Save current investigation, location and chat state"
             >
-              <Cloud className="h-3.5 w-3.5 text-white" />
-              <span className="hidden sm:inline">Save Investigation</span>
+              <Cloud className="h-3.5 w-3.5 shrink-0 text-white" />
+              <span>Save Investigation</span>
             </button>
+          )}
 
-            {/* USER PROFILE PILL */}
-            <div className="relative" ref={profileRef}>
-              <button
-                type="button"
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-slate-800/90 p-1.5 sm:px-2.5 sm:py-1.5 transition-colors"
-              >
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-6 w-6 rounded-full object-cover border border-emerald-400/40"
-                  />
-                ) : (
-                  <div className="h-6 w-6 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-xs font-bold text-emerald-300">
-                    {user?.name ? user.name[0].toUpperCase() : 'U'}
-                  </div>
-                )}
-                <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-xs font-semibold text-white leading-tight truncate max-w-[120px]">
-                    {user?.name || 'Guest User'}
-                  </span>
-                  <span className="text-[10px] text-emerald-400 leading-tight">
-                    {savedInvestigations.length} Projects
-                  </span>
-                </div>
-                <ChevronDown className="h-3 w-3 text-slate-400 hidden sm:block" />
-              </button>
-
-              {/* Profile Dropdown Menu */}
-              {profileDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-60 rounded-2xl border border-slate-800 bg-slate-950/95 p-2 shadow-2xl backdrop-blur-2xl z-[140]">
-                  <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                    <div className="text-xs font-bold text-white">{user?.name || 'Guest Researcher'}</div>
-                    <div className="text-[11px] text-slate-400 truncate">{user?.email || 'guest@spacegeoai.com'}</div>
-                    <div className="text-[10px] font-mono text-emerald-400 mt-1">{user?.role || 'Lead Researcher'}</div>
-                  </div>
-
-                  <div className="space-y-0.5">
-                    <Link
-                      href="/profile"
-                      onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                    >
-                      <User className="h-3.5 w-3.5 text-emerald-400" />
-                      Researcher Profile
-                    </Link>
-                    <Link
-                      href="/profile?tab=investigations"
-                      onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                    >
-                      <FolderOpen className="h-3.5 w-3.5 text-amber-400" />
-                      Saved Investigations ({savedInvestigations.length})
-                    </Link>
-                    <Link
-                      href="/settings"
-                      onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                    >
-                      <Settings className="h-3.5 w-3.5 text-slate-400" />
-                      Platform Settings
-                    </Link>
-                  </div>
-
-                  <div className="border-t border-slate-800/80 mt-1.5 pt-1.5">
-                    {isAuthenticated ? (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          await signOut();
-                          setProfileDropdownOpen(false);
-                          router.push('/');
-                        }}
-                        className="flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
-                      >
-                        <LogOut className="h-3.5 w-3.5" />
-                        Sign Out
-                      </button>
-                    ) : (
-                      <Link
-                        href="/auth/sign-in"
-                        onClick={() => setProfileDropdownOpen(false)}
-                        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500/20 text-orange-300 border border-orange-400/30 px-2.5 py-1.5 text-xs font-semibold hover:bg-orange-500/30 transition-colors"
-                      >
-                        Sign In / Register
-                      </Link>
-                    )}
-                  </div>
+          {/* USER PROFILE PILL: sits beside the search field on phones */}
+          <div
+            className={`relative order-2 shrink-0 md:order-5 ${isAuthenticated ? '' : 'md:ml-auto'}`}
+            ref={profileRef}
+          >
+            <button
+              type="button"
+              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-slate-800/90 p-1.5 sm:px-2.5 sm:py-1.5 transition-colors"
+            >
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="h-6 w-6 rounded-full object-cover border border-emerald-400/40"
+                />
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-xs font-bold text-emerald-300">
+                  {user?.name ? user.name[0].toUpperCase() : 'U'}
                 </div>
               )}
-            </div>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-xs font-semibold text-white leading-tight truncate max-w-[120px]">
+                  {user?.name || 'Guest User'}
+                </span>
+                <span className="text-[10px] text-emerald-400 leading-tight">
+                  {savedInvestigations.length} Projects
+                </span>
+              </div>
+              <ChevronDown className="h-3 w-3 text-slate-400 hidden sm:block" />
+            </button>
+
+            {/* Profile Dropdown Menu */}
+            {profileDropdownOpen && (
+              <div className="absolute right-0 top-full z-[140] mt-1.5 w-60 max-w-[88vw] rounded-2xl border border-slate-800 bg-slate-950/95 p-2 shadow-2xl backdrop-blur-2xl">
+                <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
+                  <div className="text-xs font-bold text-white">{user?.name || 'Guest Researcher'}</div>
+                  <div className="text-[11px] text-slate-400 truncate">{user?.email || 'guest@spacegeoai.com'}</div>
+                  <div className="text-[10px] font-mono text-emerald-400 mt-1">{user?.role || 'Lead Researcher'}</div>
+                </div>
+
+                <div className="space-y-0.5">
+                  <Link
+                    href="/profile"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                  >
+                    <User className="h-3.5 w-3.5 text-emerald-400" />
+                    Researcher Profile
+                  </Link>
+                  <Link
+                    href="/profile?tab=investigations"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                  >
+                    <FolderOpen className="h-3.5 w-3.5 text-amber-400" />
+                    Saved Investigations ({savedInvestigations.length})
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                  >
+                    <Settings className="h-3.5 w-3.5 text-slate-400" />
+                    Platform Settings
+                  </Link>
+                </div>
+
+                <div className="border-t border-slate-800/80 mt-1.5 pt-1.5">
+                  {isAuthenticated ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await signOut();
+                        setProfileDropdownOpen(false);
+                        router.push('/');
+                      }}
+                      className="flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      Sign Out
+                    </button>
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500/20 text-orange-300 border border-orange-400/30 px-2.5 py-1.5 text-xs font-semibold hover:bg-orange-500/30 transition-colors"
+                    >
+                      Sign In / Register
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -443,7 +441,7 @@ export function TopLocationBar() {
       {/* SAVE INVESTIGATION MODAL */}
       {saveModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-          <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-2xl space-y-4">
+          <div className="max-h-[90dvh] w-full max-w-md space-y-4 overflow-y-auto rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-2xl sm:p-6">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <BookmarkCheck className="h-5 w-5 text-emerald-400" />

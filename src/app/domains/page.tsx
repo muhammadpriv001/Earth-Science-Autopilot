@@ -57,7 +57,7 @@ export default function DomainsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl px-3 sm:px-6 py-8 space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6 px-3 py-6 sm:space-y-8 sm:px-6 sm:py-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-6">
         <div>
@@ -72,17 +72,17 @@ export default function DomainsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Link
             href="/vegetation"
-            className="flex items-center gap-1.5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-xs"
+            className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-xs sm:flex-none"
           >
             <Trees className="h-3.5 w-3.5 text-emerald-600" />
             Vegetation Intelligence
           </Link>
           <Link
             href="/cross-domain"
-            className="flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:from-orange-400 hover:to-amber-500 transition-all hover:scale-[1.02]"
+            className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:from-orange-400 hover:to-amber-500 transition-all hover:scale-[1.02] sm:flex-none"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Cross-Domain Discovery

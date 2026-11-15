@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { LocationProvider } from '@/context/LocationContext';
 import { AuthProvider } from '@/context/AuthAndInvestigationContext';
@@ -20,6 +20,20 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Earth Science Autopilot Team', url: 'https://spacegeoai.com' }],
   metadataBase: new URL('https://spacegeoai.com'),
+};
+
+// Mobile-first viewport configuration: safe-area aware with a forest-green
+// browser chrome that matches the portal navigation.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#06211b' },
+    { media: '(prefers-color-scheme: dark)', color: '#06211b' },
+  ],
 };
 
 export default function RootLayout({
@@ -44,7 +58,7 @@ export default function RootLayout({
           async
         />
       </head>
-      <body className="min-h-screen bg-[#f8faf9] font-sans text-slate-900 antialiased selection:bg-emerald-500/25 selection:text-emerald-900 flex flex-col">
+      <body className="flex min-h-dvh flex-col bg-[#f8faf9] font-sans text-slate-900 antialiased selection:bg-emerald-500/25 selection:text-emerald-900">
         <AuthProvider>
           <LocationProvider>
             <AppLayoutWrapper>{children}</AppLayoutWrapper>

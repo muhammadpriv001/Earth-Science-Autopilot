@@ -82,7 +82,7 @@ export default function CrossDomainDiscoveryPage() {
     scatterH - pad - ((v - minY) / (maxY - minY || 1)) * (scatterH - pad * 2);
 
   return (
-    <div className="mx-auto max-w-7xl px-3 sm:px-6 py-8 space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6 px-3 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>

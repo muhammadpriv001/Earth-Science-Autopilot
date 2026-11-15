@@ -96,7 +96,7 @@ export default function ForecastAIPage() {
   }, [fetchForecast]);
 
   return (
-    <div className="mx-auto max-w-[1920px] px-3 sm:px-6 py-5 space-y-5">
+    <div className="mx-auto max-w-[1920px] space-y-5 px-3 py-4 sm:px-6 sm:py-5">
       {/* Top Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div className="flex items-center gap-3">
@@ -104,9 +104,9 @@ export default function ForecastAIPage() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
+            <h1 className="flex flex-wrap items-center gap-2.5 text-lg font-black text-slate-900 sm:text-2xl">
               Forecast AI Laboratory
-              <span className="rounded-full bg-emerald-100 border border-emerald-300 px-3 py-0.5 text-xs font-mono font-bold text-emerald-800">
+              <span className="rounded-full border border-emerald-300 bg-emerald-100 px-3 py-0.5 text-xs font-mono font-bold text-emerald-800">
                 80% &amp; 95% Confidence Intervals
               </span>
             </h1>
@@ -117,7 +117,7 @@ export default function ForecastAIPage() {
         </div>
 
         {/* Global Controls & Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto sm:flex-nowrap">
           {/* Variable Selector */}
           <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 shadow-xs">
             <Layers className="h-4 w-4 text-emerald-600" />
@@ -154,7 +154,7 @@ export default function ForecastAIPage() {
       </div>
 
       {/* Main Two-Panel Layout: Forecast Analytics (Left) + AI Forecast Chat (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-[calc(100dvh-185px)] min-h-[520px]">
+      <div className="workspace-forecast grid grid-cols-1 gap-5 lg:grid-cols-12">
         {/* Left: Forecast Analytics Panel (8 cols) */}
         <div className="lg:col-span-8 h-full rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md flex flex-col justify-between overflow-y-auto space-y-4">
           {/* Parameter Tuning Bar */}

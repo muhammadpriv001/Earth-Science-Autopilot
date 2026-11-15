@@ -93,9 +93,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1920px] px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <div className="mx-auto max-w-[1920px] space-y-6 px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
       {/* Top Banner / Welcome: Dashboard V22 Deep Pine Green Hero Card with Coral Accent CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl border border-emerald-900/40 bg-gradient-to-r from-[#06211b] via-[#07241e] to-[#0a2e26] p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-5 rounded-3xl border border-emerald-900/40 bg-gradient-to-r from-[#06211b] via-[#07241e] to-[#0a2e26] p-5 shadow-2xl backdrop-blur-xl sm:gap-6 sm:p-8">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -116,7 +116,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto sm:gap-3">
           {/* Coral / Peach Accent Button (as in Dashboard V22 screenshot "Add member") */}
           <Link
             href="/explore"
@@ -198,14 +198,14 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* User Saved Projects Card */}
           <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FolderGit2 className="h-5 w-5 text-amber-500" />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="flex min-w-0 items-center gap-2 text-base font-bold text-slate-900">
+                <FolderGit2 className="h-5 w-5 shrink-0 text-amber-500" />
                 Your Active Investigations ({savedInvestigations.length})
               </h2>
               <Link
                 href="/profile?tab=investigations"
-                className="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1"
+                className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs font-bold text-emerald-700 hover:text-emerald-900"
               >
                 View all in profile →
               </Link>
@@ -265,9 +265,9 @@ export default function DashboardPage() {
 
           {/* Benchmark Guided Studies Card */}
           <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <LineChart className="h-5 w-5 text-teal-600" />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="flex min-w-0 items-center gap-2 text-base font-bold text-slate-900">
+                <LineChart className="h-5 w-5 shrink-0 text-teal-600" />
                 NASA Challenge Guided Benchmark Studies
               </h2>
             </div>

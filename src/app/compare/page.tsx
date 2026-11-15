@@ -144,16 +144,16 @@ export default function ComparePage() {
   }, [mainLocation.name, secondaryLocation.name, selectedVariable]);
 
   return (
-    <div className="mx-auto max-w-[1920px] px-3 sm:px-6 py-6 space-y-6">
+    <div className="mx-auto max-w-[1920px] space-y-5 px-3 py-5 sm:px-6 sm:py-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
         <div>
           <div className="flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-1">
             <GitCompare className="h-4 w-4" /> Multi-Region Divergence Laboratory
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
+          <h1 className="flex flex-wrap items-center gap-2.5 text-lg font-black text-slate-900 sm:text-2xl">
             Regional Environmental Trend Comparison
-            <span className="rounded-full bg-emerald-100 border border-emerald-300 px-3 py-0.5 text-xs font-mono font-bold text-emerald-800">
+            <span className="rounded-full border border-emerald-300 bg-emerald-100 px-3 py-0.5 text-xs font-mono font-bold text-emerald-800">
               Dual-Region Divergence
             </span>
           </h1>
@@ -164,7 +164,7 @@ export default function ComparePage() {
 
         <Link
           href="/analysis"
-          className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all"
+          className="flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 sm:w-auto"
         >
           Back to Single-Region Analysis →
         </Link>
@@ -174,11 +174,11 @@ export default function ComparePage() {
       <div className="relative z-50 grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md">
         {/* Primary Region A Display (Inherited from Main Location Selector) */}
         <div className="lg:col-span-5 rounded-2xl border border-teal-200/80 bg-[#f8faf9] p-4 space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-teal-800 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs">
+            <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-teal-800">
               <MapPin className="h-3.5 w-3.5 text-teal-600" /> Primary Region (A)
             </span>
-            <span className="text-[10px] font-mono text-slate-400 font-semibold">Locked to Main Search</span>
+            <span className="shrink-0 text-[10px] font-mono font-semibold text-slate-400">Locked to Main Search</span>
           </div>
           <div className="text-sm font-bold text-slate-900 truncate">{mainLocation.name}</div>
           <div className="text-[11px] font-mono text-teal-700 font-semibold">
@@ -188,17 +188,18 @@ export default function ComparePage() {
 
         {/* COMPARATIVE REGION B SELECTOR (Interactive Search & Presets) */}
         <div className="lg:col-span-7 rounded-2xl border border-orange-200/80 bg-orange-50/30 p-4 space-y-2.5" ref={searchBRef}>
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-orange-900 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
+            <span className="flex shrink-0 items-center gap-1.5 font-bold uppercase tracking-wider text-orange-900">
               <MapPin className="h-3.5 w-3.5 text-orange-600" /> Comparative Region (B)
             </span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               {PRESET_LOCATIONS_B.slice(0, 3).map((p, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => handleSelectPresetB(p)}
-                  className={`rounded-xl px-2.5 py-1 text-[10px] font-bold transition-all ${secondaryLocation.name.includes(p.name.split(',')[0])
+                  title={p.name.split(',')[0]}
+                  className={`max-w-[9.5rem] truncate whitespace-nowrap rounded-xl px-2.5 py-1 text-[10px] font-bold transition-all ${secondaryLocation.name.includes(p.name.split(',')[0])
                     ? 'bg-orange-500 text-white shadow-sm'
                     : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 shadow-xs'
                     }`}
@@ -293,7 +294,7 @@ export default function ComparePage() {
         <select
           value={selectedVariable}
           onChange={e => setSelectedVariable(e.target.value)}
-          className="cursor-pointer bg-transparent pr-1 rounded text-xs font-bold text-slate-800 focus:outline-none"
+          className="w-full min-w-0 cursor-pointer truncate rounded bg-transparent pr-1 text-xs font-bold text-slate-800 focus:outline-none"
         >
           {LIVE_VARIABLE_GROUPS.map(group => (
             <optgroup key={group.id} label={group.shortLabel}>
@@ -316,7 +317,7 @@ export default function ComparePage() {
 
       {/* SECTION 1: MULTI-VARIABLE DIVERGENCE CHART & STATISTICS */}
       <section className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-emerald-600" />
             <div>
@@ -394,7 +395,7 @@ export default function ComparePage() {
 
       {/* SECTION 2: VEGETATION & BIOSPHERE COMPARATIVE SECTION */}
       <section className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Trees className="h-5 w-5 text-emerald-600" />
             <div>
@@ -424,7 +425,7 @@ export default function ComparePage() {
 
       {/* SECTION 3: TIME-STAMPED SATELLITE VISUAL COMPARISON ACROSS BOTH REGIONS */}
       <section className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-emerald-600" />
             <div>
@@ -444,7 +445,7 @@ export default function ComparePage() {
             Satellite imagery
           </div>
           {mainLocation.coordinates && secondaryLocation.coordinates ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {(['historical', 'intermediate', 'recent'] as const).map(epochId => {
                 const mainImagery = getAllEpochImagery(
                   mainLocation.coordinates,
@@ -473,7 +474,7 @@ export default function ComparePage() {
                       {epochMain?.epoch.label || epochId}
                     </h3>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <div className="mb-2 text-xs font-bold text-slate-600">
                           Region A ({mainLocation.name})
@@ -513,7 +514,7 @@ export default function ComparePage() {
                       </div>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2 gap-3">
+                    <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <div className="mb-2 text-xs font-bold text-slate-600">
                           Region A NDVI

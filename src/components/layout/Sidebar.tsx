@@ -41,7 +41,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="group/sidebar relative z-40 flex flex-col h-full bg-[#06211b] border-r border-emerald-900/60 backdrop-blur-2xl transition-all duration-300 ease-in-out select-none w-[72px] hover:w-64 shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.5)] overflow-hidden"
+      className="group/sidebar relative z-40 hidden h-full w-[72px] shrink-0 select-none flex-col overflow-hidden border-r border-emerald-900/60 bg-[#06211b] shadow-[4px_0_24px_rgba(0,0,0,0.5)] backdrop-blur-2xl transition-all duration-300 ease-in-out hover:w-64 md:flex"
     >
       {/* BRAND & LOGO HEADER */}
       <div className="flex items-center px-4 py-3.5 border-b border-emerald-900/30">

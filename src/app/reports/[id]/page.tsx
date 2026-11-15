@@ -112,7 +112,7 @@ export default function ReportPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <div className="mx-auto max-w-4xl space-y-6 px-3 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8">
       {/* Top Toolbar (Hidden during print) */}
       <div className="print:hidden flex flex-wrap items-center justify-between gap-4">
         <Link
@@ -241,7 +241,8 @@ export default function ReportPage() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
               <Calculator className="h-4 w-4" /> 4. Deterministic Statistical Analysis
             </h2>
-            <table className="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden font-mono">
+            <div className="-mx-2 overflow-x-auto px-2 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[640px] overflow-hidden rounded-lg border border-slate-200 text-left font-mono text-xs">
               <thead className="bg-[#f8faf9] text-slate-600">
                 <tr>
                   <th className="p-3">Statistical Metric</th>
@@ -292,6 +293,7 @@ export default function ReportPage() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </section>
 
           {/* 5. Methodological Limitations */}

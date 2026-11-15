@@ -214,14 +214,14 @@ function AnalysisContent() {
   };
 
   return (
-    <div className="mx-auto max-w-[1920px] px-3 sm:px-6 py-6 space-y-6">
+    <div className="mx-auto max-w-[1920px] space-y-5 px-3 py-4 sm:px-6 sm:py-6">
       {/* Header & Global Footprint */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
         <div>
           <div className="flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-1">
             <TrendingUp className="h-4 w-4" /> Earth-System Investigation Laboratory
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
+          <h1 className="flex flex-wrap items-center gap-2.5 text-lg font-black text-slate-900 sm:text-2xl">
             Statistical Analysis &amp; Environmental Trends
             <span className="rounded-full bg-emerald-100 border border-emerald-300 px-3 py-0.5 text-xs font-mono font-bold text-emerald-800">
               {mainLocation.radiusKm} km Footprint
@@ -234,27 +234,28 @@ function AnalysisContent() {
         </div>
 
         {/* Global Action CTAs */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto sm:flex-nowrap">
           <button
             onClick={handleExportCSV}
             disabled={!dataset}
-            className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 disabled:opacity-50 sm:flex-none"
           >
             <Download className="h-4 w-4 text-emerald-700" />
             Export CSV
           </button>
           <Link
             href={`/compare`}
-            className="flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:from-orange-400 hover:to-amber-500 hover:scale-[1.02] active:scale-98 transition-all"
+            className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500 active:scale-98 sm:flex-none"
           >
             <GitCompare className="h-4 w-4" />
-            Compare With Another Location →
+            <span className="sm:hidden">Compare</span>
+            <span className="hidden sm:inline">Compare With Another Location →</span>
           </Link>
         </div>
       </div>
 
       {/* CATEGORY SELECTOR TABS (Dashboard V22 Style) */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
+      <div className="flex flex-wrap items-center gap-2 pb-1">
         {ANALYSIS_CATEGORIES.map(cat => {
           const Icon = cat.icon;
           const isActive = selectedCategory === cat.id;
@@ -428,14 +429,14 @@ function AnalysisContent() {
 
         {/* Imagery Display */}
         {imageryData ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {imageryData.map((img, i) => (
               <div key={img.epoch.id} className="rounded-xl border p-3 bg-white/95">
                 <img
                   src={img.trueColorUrl}
                   alt={`True-color ${img.epoch.shortLabel} imagery`}
                   loading="lazy"
-                  className="w-full h-48 object-cover rounded-t-xl"
+                  className="h-40 w-full rounded-t-xl object-cover sm:h-48"
                 />
                 <div className="p-2 text-xs font-bold text-emerald-800">
                   True Color ({img.epoch.shortLabel})
@@ -458,7 +459,7 @@ function AnalysisContent() {
       {/* SECTION 3: VEGETATION & BIOSPHERE COMPREHENSIVE SUB-LABS */}
       {(selectedCategory === 'all' || selectedCategory === 'vegetation') && (
         <section className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <Trees className="h-5 w-5 text-emerald-600" />
               <div>
@@ -472,7 +473,7 @@ function AnalysisContent() {
             </div>
             <Link
               href="/vegetation"
-              className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1"
+              className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs font-bold text-emerald-700 hover:text-emerald-900"
             >
               Open Dedicated Vegetation Lab <ChevronRight className="h-3.5 w-3.5" />
             </Link>
@@ -501,7 +502,7 @@ function AnalysisContent() {
       {/* SECTION 4: CROSS-DOMAIN ENVIRONMENTAL COUPLING */}
       {(selectedCategory === 'all' || selectedCategory === 'cross-domain') && (
         <section className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[6px_6px_20px_rgba(0,0,0,0.03),-4px_-4px_16px_rgba(255,255,255,0.9)] backdrop-blur-md space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-indigo-600" />
               <div>
@@ -515,7 +516,7 @@ function AnalysisContent() {
             </div>
             <Link
               href="/cross-domain"
-              className="text-xs font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1"
+              className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs font-bold text-indigo-700 hover:text-indigo-900"
             >
               Open Full Cross-Domain Lab <ChevronRight className="h-3.5 w-3.5" />
             </Link>

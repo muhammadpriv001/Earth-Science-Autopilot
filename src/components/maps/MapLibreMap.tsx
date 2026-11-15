@@ -411,9 +411,9 @@ export function MapLibreMap({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[560px] rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl flex flex-col">
+    <div className="relative flex h-full min-h-[320px] w-full flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-2xl sm:min-h-[520px]">
       {/* Top Floating Controls Bar */}
-      <div className="absolute top-4 inset-x-4 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+      <div className="absolute inset-x-3 top-3 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none sm:inset-x-4 sm:top-4">
         {/* Search Input Box */}
         <div className="pointer-events-auto relative w-72 sm:w-80">
           <form onSubmit={handleSearch} className="relative">
@@ -473,7 +473,7 @@ export function MapLibreMap({
       </div>
 
       {/* Main Map Canvas */}
-      <div className="relative flex-1 w-full h-full min-h-[460px]">
+      <div className="relative h-full min-h-[300px] w-full flex-1 sm:min-h-[420px]">
         {!leafletReady && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950 text-slate-400 gap-3">
             <Globe2 className="h-8 w-8 text-emerald-400 animate-spin-slow" />
@@ -482,7 +482,7 @@ export function MapLibreMap({
         )}
         <div
           ref={mapContainerRef}
-          className="w-full h-full min-h-[460px] z-0"
+          className="z-0 h-full min-h-[300px] w-full sm:min-h-[420px]"
           style={{ minHeight: '460px', height: '100%', width: '100%' }}
         />
       </div>

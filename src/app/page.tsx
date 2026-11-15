@@ -50,7 +50,7 @@ export default function LandingPage() {
           HERO SECTION: PRIMARY FOREST GREEN THEME WITH PARALLAX GLOBE BACKGROUND
           ========================================================================= */}
 
-      <section className="relative isolate min-h-[76vh] flex flex-col justify-center bg-gradient-to-b from-[#06211b] via-[#07261f] to-[#0a332a] px-4 pt-10 pb-24 sm:px-6 lg:px-8 text-center overflow-hidden">
+      <section className="relative isolate flex min-h-dvh flex-col justify-center overflow-hidden bg-gradient-to-b from-[#06211b] via-[#07261f] to-[#0a332a] px-4 pb-20 pt-10 text-center sm:min-h-[76vh] sm:px-6 sm:pb-24 sm:pt-10 lg:px-8">
         {/* PARALLAX GLOBE */}
         <ParallaxGlobe />
 
@@ -58,8 +58,8 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-cyan-500/15 via-indigo-500/10 to-transparent blur-3xl opacity-75" />
 
         {/* HERO CONTENT */}
-        <div className="relative z-10 max-w-5xl mx-auto space-y-7">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] drop-shadow-lg">
+        <div className="relative z-10 mx-auto max-w-5xl space-y-6 sm:space-y-7">
+          <h1 className="text-3xl font-black leading-[1.08] tracking-tight text-white drop-shadow-lg sm:text-6xl lg:text-7xl">
             ASK THE EARTH
             <span className="block mt-2 bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">
               Search. Investigate. Discover.
@@ -71,10 +71,10 @@ export default function LandingPage() {
           </p>
 
           {/* CALL TO ACTIONS */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-col items-stretch justify-center gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <Link
               href="/auth/sign-up"
-              className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-orange-500/30 hover:from-orange-400 hover:to-amber-500 hover:scale-[1.02] active:scale-98 transition-all duration-200"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-orange-500/30 transition-all duration-200 hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500 active:scale-98 sm:w-auto sm:px-7 sm:py-4"
             >
               <UserCheck className="h-4 w-4" />
               <span>Create Researcher Account</span>
@@ -83,7 +83,7 @@ export default function LandingPage() {
 
             <Link
               href="/auth/sign-in"
-              className="flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/20 hover:bg-emerald-500/30 px-6 py-4 text-sm font-bold text-emerald-200 hover:text-white shadow-lg shadow-emerald-950/40 backdrop-blur-xl hover:scale-[1.02] active:scale-98 transition-all duration-200"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-6 py-3.5 text-sm font-bold text-emerald-200 shadow-lg shadow-emerald-950/40 backdrop-blur-xl transition-all duration-200 hover:scale-[1.02] hover:bg-emerald-500/30 hover:text-white active:scale-98 sm:w-auto sm:py-4"
             >
               <Compass className="h-4 w-4 text-emerald-300" />
               <span>Explore Portal</span>
@@ -91,7 +91,7 @@ export default function LandingPage() {
 
             <Link
               href="/auth/sign-in"
-              className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 hover:bg-black/50 px-5 py-4 text-sm font-semibold text-white backdrop-blur-md transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/30 px-5 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-black/50 sm:w-auto sm:py-4"
             >
               <span>Sign In</span>
             </Link>
@@ -109,7 +109,7 @@ export default function LandingPage() {
         </div>
 
         {/* FULL-WIDTH FEATURED CASE STUDIES RIBBON */}
-        <div className="absolute bottom-0 left-1/2 z-30 w-screen -translate-x-1/2 overflow-hidden bg-[#303030] border-t-[3px] border-t-orange-500 border-b-[3px] border-b-emerald-500 shadow-lg">
+        <div className="featured-ribbon-shell absolute bottom-0 left-1/2 z-30 w-screen -translate-x-1/2 overflow-hidden bg-[#303030] border-t-[3px] border-t-orange-500 border-b-[3px] border-b-emerald-500 shadow-lg">
 
           {/* RIBBON LABEL */}
           <div className="absolute left-0 top-0 bottom-0 z-20 hidden sm:flex items-center border-r border-orange-500/40 bg-[#303030] px-5">
@@ -172,8 +172,8 @@ export default function LandingPage() {
           ========================================================================= */}
       <div className="bg-[#f8faf9] text-slate-800 transition-colors">
         {/* SECTION 1: MISSION & VISION */}
-        <section id="vision" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
+        <section id="vision" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
+          <div className="mx-auto mb-10 max-w-3xl space-y-4 text-center sm:mb-16">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider font-mono bg-emerald-100/80 px-3.5 py-1 rounded-full border border-emerald-200">
               <Compass className="h-3.5 w-3.5 text-emerald-600" />
               Scientific Vision &amp; Platform Architecture
@@ -224,7 +224,7 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 2: 11 EARTH-SYSTEM DOMAINS */}
-        <section id="domains" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 border-t border-slate-200/70">
+        <section id="domains" className="mx-auto max-w-7xl scroll-mt-20 border-t border-slate-200/70 px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
             <div>
               <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider font-mono">
@@ -301,8 +301,8 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 3: SCIENTIFIC FORMULATION RIGOR */}
-        <section id="science" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 border-t border-slate-200/70">
-          <div className="rounded-3xl bg-gradient-to-tr from-white via-emerald-50/60 to-orange-50/50 p-8 sm:p-12 border border-emerald-200/80 shadow-xl shadow-emerald-900/5 space-y-6">
+        <section id="science" className="mx-auto max-w-7xl scroll-mt-20 border-t border-slate-200/70 px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
+          <div className="space-y-6 rounded-3xl border border-emerald-200/80 bg-gradient-to-tr from-white via-emerald-50/60 to-orange-50/50 p-5 shadow-xl shadow-emerald-900/5 sm:p-12">
             <div className="max-w-2xl">
               <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider font-mono">
                 Audited Statistical Pipeline
@@ -352,8 +352,8 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 4: CALL TO ACTION BANNER */}
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 border-t border-slate-200/70 text-center">
-          <div className="relative overflow-hidden rounded-3xl bg-[#06211b] p-10 sm:p-14 shadow-2xl text-white space-y-6 max-w-4xl mx-auto border border-emerald-500/30">
+        <section className="mx-auto max-w-7xl border-t border-slate-200/70 px-4 py-12 text-center sm:px-6 sm:py-20 lg:px-8">
+          <div className="relative mx-auto max-w-4xl space-y-5 overflow-hidden rounded-3xl border border-emerald-500/30 bg-[#06211b] p-6 text-white shadow-2xl sm:space-y-6 sm:p-14">
             <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-orange-400" />
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               Start Investigating Earth Systems
@@ -362,16 +362,16 @@ export default function LandingPage() {
               Create your researcher account to unlock persistent cloud saves, or launch directly into the portal as a guest.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <div className="flex flex-col items-stretch justify-center gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <Link
                 href="/auth/sign-up"
-                className="rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-8 py-3.5 text-xs font-bold text-white shadow-xl shadow-orange-500/30 hover:from-orange-400 hover:to-amber-500 transition-all hover:scale-[1.02]"
+                className="flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-8 py-3.5 text-xs font-bold text-white shadow-xl shadow-orange-500/30 transition-all hover:scale-[1.02] hover:from-orange-400 hover:to-amber-500 sm:w-auto"
               >
                 Register Free Researcher Account
               </Link>
               <Link
                 href="/dashboard"
-                className="rounded-2xl border border-emerald-400/40 bg-emerald-500/20 hover:bg-emerald-500/30 px-8 py-3.5 text-xs font-bold text-emerald-200 hover:text-white transition-colors"
+                className="flex w-full items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-8 py-3.5 text-xs font-bold text-emerald-200 transition-colors hover:bg-emerald-500/30 hover:text-white sm:w-auto"
               >
                 Open Portal as Guest
               </Link>

@@ -4,9 +4,9 @@ import { Compass, ExternalLink, ShieldCheck, Globe, Database } from 'lucide-reac
 
 export function Footer() {
   return (
-    <footer className="w-full border-t border-emerald-900/60 bg-[#06211b] text-emerald-100/70 text-xs select-none">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="mobile-nav-spacer w-full select-none border-t border-emerald-900/60 bg-[#06211b] text-xs text-emerald-100/70">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 md:grid-cols-4 md:gap-8">
           {/* Brand Info */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2.5">

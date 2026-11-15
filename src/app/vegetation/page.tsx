@@ -221,7 +221,7 @@ export default function VegetationWorkspacePage() {
     (liveNDVI?.configured === false && liveNDVI?.status !== 'error');
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl space-y-6 px-3 py-6 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8">
 
       {/* Page header */}
       <header className="border-b border-slate-200 pb-6">

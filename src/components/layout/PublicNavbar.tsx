@@ -9,8 +9,8 @@ export function PublicNavbar() {
   const { user } = useAuth();
 
   return (
-    <header className="w-full bg-[#06211b]/90 border-b border-emerald-500/25 backdrop-blur-2xl sticky top-0 z-50 px-4 sm:px-8 py-3.5 transition-all shadow-[0_12px_36px_rgba(0,0,0,0.5)]">
-      <div className="mx-auto max-w-7xl flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-emerald-500/25 bg-[#06211b]/90 px-3 py-3 shadow-[0_12px_36px_rgba(0,0,0,0.5)] backdrop-blur-2xl transition-all sm:px-8 sm:py-3.5">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 sm:gap-4">
         {/* BRAND & LOGO (Inspired by Dashboard V22 Neomorphic Capsule) */}
         <Link href="/" className="flex items-center gap-3 group cursor-pointer">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-300 shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-200">
@@ -31,7 +31,7 @@ export function PublicNavbar() {
         </Link>
 
         {/* NAVIGATION LINKS */}
-        <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-slate-200">
+        <nav className="hidden items-center gap-5 text-xs font-semibold text-slate-200 md:flex lg:gap-7">
           <a href="/#vision" className="hover:text-emerald-300 transition-colors">
             Mission &amp; Vision
           </a>

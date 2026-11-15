@@ -81,10 +81,10 @@ function ProfileContent() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+    <div className="mx-auto max-w-6xl space-y-5 px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
       {/* User Header Profile Card: Dashboard V22 Deep Pine Green Card */}
-      <div className="rounded-3xl border border-emerald-900/40 bg-gradient-to-r from-[#06211b] via-[#07241e] to-[#0a2e26] p-6 sm:p-8 shadow-2xl backdrop-blur-xl flex flex-wrap items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-5 rounded-3xl border border-emerald-900/40 bg-gradient-to-r from-[#06211b] via-[#07241e] to-[#0a2e26] p-5 shadow-2xl backdrop-blur-xl sm:gap-6 sm:p-8">
+        <div className="flex min-w-0 items-center gap-4">
           {user?.avatar ? (
             <img
               src={user.avatar}
@@ -96,10 +96,10 @@ function ProfileContent() {
               {user?.name ? user.name[0].toUpperCase() : 'U'}
             </div>
           )}
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
+          <div className="min-w-0">
+            <h1 className="flex flex-wrap items-center gap-2.5 text-lg font-black text-white sm:text-2xl">
               {user?.name || 'Guest Researcher'}
-              <span className="rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3 py-0.5 text-xs font-bold text-emerald-300">
+              <span className="rounded-full border border-emerald-400/30 bg-emerald-500/20 px-3 py-0.5 text-xs font-bold text-emerald-300">
                 {user ? 'Verified Detective' : 'Guest Mode'}
               </span>
             </h1>
@@ -110,7 +110,7 @@ function ProfileContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto sm:gap-3">
           <Link
             href="/explore"
             className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-5 py-2.5 text-xs font-bold text-white shadow-xl shadow-orange-500/25 hover:from-orange-400 hover:to-amber-500 hover:scale-[1.02] active:scale-98 transition-all"
@@ -141,10 +141,10 @@ function ProfileContent() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="-mx-1 flex flex-wrap items-center gap-2 border-b border-slate-200 px-1 pb-2">
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
             activeTab === 'profile'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20'
               : 'border border-slate-200/80 bg-white/90 text-slate-600 hover:text-slate-900 shadow-sm'
@@ -155,7 +155,7 @@ function ProfileContent() {
         </button>
         <button
           onClick={() => setActiveTab('investigations')}
-          className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
             activeTab === 'investigations'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20'
               : 'border border-slate-200/80 bg-white/90 text-slate-600 hover:text-slate-900 shadow-sm'
@@ -166,7 +166,7 @@ function ProfileContent() {
         </button>
         <button
           onClick={() => setActiveTab('security')}
-          className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
             activeTab === 'security'
               ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
               : 'border border-slate-200/80 bg-white/90 text-slate-600 hover:text-slate-900 shadow-sm'
