@@ -89,13 +89,13 @@ export function LiveBenchmarkCards() {
     },
     {
       card: 'border-orange-500/35 bg-gradient-to-br from-orange-500/15 via-[#092b23]/80 to-[#092b23]/70 hover:border-orange-400/70 hover:from-orange-500/25',
-      strip: 'from-orange-400 via-amber-300 to-emerald-400',
+      strip: 'from-emerald-400 via-amber-300 to-orange-400',
       title: 'text-orange-200',
       value: 'text-orange-300',
       meta: 'text-orange-300/70',
     },
     {
-      card: 'border-emerald-500/35 bg-gradient-to-br from-emerald-500/15 via-[#092b23]/80 to-[#092b23]/70 hover:border-emerald-400/70 hover:from-emerald-500/25',
+      card: 'border-emerald-500/35 bg-gradient-to-br from-emerald-500/15 via-[#092b23]/80 to-[#092b23]/70 hover:border-orange-400/70 hover:from-emerald-500/25',
       strip: 'from-emerald-400 via-teal-300 to-orange-400',
       title: 'text-emerald-200',
       value: 'text-orange-300',
@@ -108,9 +108,8 @@ export function LiveBenchmarkCards() {
       {studies.map((study, index) => {
         const accent = accents[index % accents.length];
         return (
-          <Link
+          <div
             key={study.id}
-            href={`/analysis?preset=${study.id}`}
             className={`group relative overflow-hidden rounded-2xl border p-3 transition-all hover:shadow-lg ${accent.card}`}
           >
             <span className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${accent.strip}`} />
@@ -120,7 +119,7 @@ export function LiveBenchmarkCards() {
             </div>
             <div className="text-[11px] text-emerald-200/70 mt-1">{study.period} • {study.region}</div>
             <div className={`text-[10px] mt-1 font-mono ${accent.meta}`}>{pLabel(study)}</div>
-          </Link>
+          </div>
         );
       })}
     </div>

@@ -119,3 +119,32 @@ body {
     animation: none;
   }
 }
+
+/* =========================================================
+   FEATURED CASE STUDIES — HERO MARQUEE
+   ========================================================= */
+
+.featured-ribbon-track {
+  animation: featured-ribbon-scroll 55s linear infinite;
+  will-change: transform;
+}
+
+.featured-ribbon-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes featured-ribbon-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-ribbon-track {
+    animation: none;
+  }
+}

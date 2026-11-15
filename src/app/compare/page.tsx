@@ -443,64 +443,137 @@ export default function ComparePage() {
             <Eye className="h-4 w-4 text-amber-500" />
             Satellite imagery
           </div>
-          {mainLocation.center && secondaryLocation.center ? (
+          {mainLocation.coordinates && secondaryLocation.coordinates ? (
             <div className="grid grid-cols-2 gap-4">
-              {['historical', 'intermediate', 'recent'].map(epochId => {
-                const mainImagery = getAllEpochImagery(mainLocation.center, mainLocation.radiusKm || 100);
-                const secondaryCenter = secondaryLocation.coordinates ?? mainLocation.coordinates;
-                const secondaryRadius = secondaryLocation.radiusKm ?? (mainLocation.radiusKm || 100);
-                const secondaryImagery = getAllEpochImagery(secondaryCenter, secondaryRadius);
-                const epochMain = mainImagery.find(e => e.id === epochId);
-                const epochSecondary = secondaryImagery.find(e => e.id === epochId);
+              {(['historical', 'intermediate', 'recent'] as const).map(epochId => {
+                const mainImagery = getAllEpochImagery(
+                  mainLocation.coordinates,
+                  mainLocation.radiusKm || 100
+                );
+
+                const secondaryImagery = getAllEpochImagery(
+                  secondaryLocation.coordinates,
+                  secondaryLocation.radiusKm || 100
+                );
+
+                const epochMain = mainImagery.find(
+                  imagery => imagery.epoch.id === epochId
+                );
+
+                const epochSecondary = secondaryImagery.find(
+                  imagery => imagery.epoch.id === epochId
+                );
+
                 return (
-                  <div key={epochId} className="rounded-xl border border-slate-200 p-3 hover:border-emerald-400 transition-colors">
-                    <div className="text-xs font-bold text-slate-600">Region A ({mainLocation.name})</div>
-                    <a
-                      href={epochMain?.trueColorUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md p-2 bg-white/50 text-sm text-slate-500 hover:bg-white/80 transition-colors"
-                    >
-                      True Color
-                    </a>
-                    <div className="my-2">
-                      <img
-                        src={epochMain?.ndviUrl || '/placeholder.svg'}
-                        alt={`NDVI ${epochId} Region A`}
-                        className="w-full h-32 object-cover rounded-md"
-                      />
-                    </div>
-                    {epochSecondary && (
-                      <>
-                        <div className="mt-2 text-xs font-bold text-slate-600">
+                  <div
+                    key={epochId}
+                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                  >
+                    <h3 className="mb-3 font-semibold text-slate-800">
+                      {epochMain?.epoch.label || epochId}
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <div className="mb-2 text-xs font-bold text-slate-600">
+                          Region A ({mainLocation.name})
+                        </div>
+
+                        <a
+                          href={epochMain?.trueColorUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <img
+                            src={epochMain?.trueColorUrl || '/placeholder.svg'}
+                            alt={`Region A true-colour satellite imagery for ${epochId}`}
+                            className="h-40 w-full rounded-lg border border-slate-200 object-cover"
+                          />
+                        </a>
+                      </div>
+
+                      <div>
+                        <div className="mb-2 text-xs font-bold text-slate-600">
                           Region B ({secondaryLocation.name})
                         </div>
 
                         <a
-                          href={epochSecondary.trueColorUrl || '#'}
+                          href={epochSecondary?.trueColorUrl || '#'}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-md p-2 bg-white/50 text-sm text-slate-500 hover:bg-white/80 transition-colors"
+                          className="block"
                         >
-                          True Color
-                        </a>
-
-                        <div className="my-2">
                           <img
-                            src={epochSecondary.ndviUrl || '/placeholder.svg'}
-                            alt={`NDVI ${epochId} Region B`}
-                            className="w-full h-32 object-cover rounded-md"
+                            src={epochSecondary?.trueColorUrl || '/placeholder.svg'}
+                            alt={`Region B true-colour satellite imagery for ${epochId}`}
+                            className="h-40 w-full rounded-lg border border-slate-200 object-cover"
                           />
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <div>
+                        <div className="mb-2 text-xs font-bold text-slate-600">
+                          Region A NDVI
                         </div>
-                      </>
-                    )}
+
+                        <a
+                          href={epochMain?.ndviUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <img
+                            src={epochMain?.ndviUrl || '/placeholder.svg'}
+                            alt={`Region A NDVI imagery for ${epochId}`}
+                            className="h-40 w-full rounded-lg border border-slate-200 bg-slate-50 object-cover"
+                          />
+                        </a>
+                      </div>
+
+                      <div>
+                        <div className="mb-2 text-xs font-bold text-slate-600">
+                          Region B NDVI
+                        </div>
+
+                        <a
+                          href={epochSecondary?.ndviUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <img
+                            src={epochSecondary?.ndviUrl || '/placeholder.svg'}
+                            alt={`Region B NDVI imagery for ${epochId}`}
+                            className="h-40 w-full rounded-lg border border-slate-200 bg-slate-50 object-cover"
+                          />
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex justify-between text-xs text-slate-500">
+                      <span>Acquisition date: {epochMain?.epoch.date}</span>
+
+                      {epochMain && (
+                        <a
+                          href={epochMain.worldViewUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-blue-600 hover:underline"
+                        >
+                          Open NASA Worldview ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-xs text-slate-500">
-              Select regions to enable satellite visual comparison
+            <p className="text-sm text-slate-500">
+              Select both locations to compare satellite imagery.
             </p>
           )}
         </div>

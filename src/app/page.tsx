@@ -49,16 +49,16 @@ export default function LandingPage() {
       {/* =========================================================================
           HERO SECTION: PRIMARY FOREST GREEN THEME WITH PARALLAX GLOBE BACKGROUND
           ========================================================================= */}
-      <section className="relative min-h-[76vh] flex flex-col justify-center bg-gradient-to-b from-[#06211b] via-[#07261f] to-[#0a332a] px-4 pt-10 pb-16 sm:px-6 lg:px-8 text-center overflow-hidden">
-        {/* PARALLAX GLOBE (CANVAS 3D PARALLAX EFFECT ONLY IN HERO) */}
+
+      <section className="relative isolate min-h-[76vh] flex flex-col justify-center bg-gradient-to-b from-[#06211b] via-[#07261f] to-[#0a332a] px-4 pt-10 pb-24 sm:px-6 lg:px-8 text-center overflow-hidden">
+        {/* PARALLAX GLOBE */}
         <ParallaxGlobe />
 
-        {/* Ambient Top Glow (Celestial Azure & Coral, contrasts sharply with forest background) */}
+        {/* AMBIENT GLOW */}
         <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-cyan-500/15 via-indigo-500/10 to-transparent blur-3xl opacity-75" />
 
-        {/* CONTENT LAYER OVER GLOBE */}
+        {/* HERO CONTENT */}
         <div className="relative z-10 max-w-5xl mx-auto space-y-7">
-          {/* Main Title Heading directly on top of the Parallax Globe */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] drop-shadow-lg">
             ASK THE EARTH
             <span className="block mt-2 bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">
@@ -70,9 +70,8 @@ export default function LandingPage() {
             The autonomous Earth-science research platform transforming natural-language inquiries into rigorous geospatial time series, deterministic trend detection (Mann-Kendall &amp; Sen&apos;s slope), and reproducible scientific reports.
           </p>
 
-          {/* Call-to-Action Action Buttons */}
+          {/* CALL TO ACTIONS */}
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
-            {/* Warm Coral/Orange Accent Button (as in Dashboard V22 screenshot) */}
             <Link
               href="/auth/sign-up"
               className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-orange-500/30 hover:from-orange-400 hover:to-amber-500 hover:scale-[1.02] active:scale-98 transition-all duration-200"
@@ -82,16 +81,14 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
 
-            {/* Glowing Mint Glass Button */}
             <Link
-              href="/dashboard"
+              href="/auth/sign-in"
               className="flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/20 hover:bg-emerald-500/30 px-6 py-4 text-sm font-bold text-emerald-200 hover:text-white shadow-lg shadow-emerald-950/40 backdrop-blur-xl hover:scale-[1.02] active:scale-98 transition-all duration-200"
             >
               <Compass className="h-4 w-4 text-emerald-300" />
-              <span>Explore Portal as Guest</span>
+              <span>Explore Portal</span>
             </Link>
 
-            {/* Subtle Glass Sign In Button */}
             <Link
               href="/auth/sign-in"
               className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 hover:bg-black/50 px-5 py-4 text-sm font-semibold text-white backdrop-blur-md transition-colors"
@@ -100,31 +97,75 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Guest Account vs Registered Researcher Notice */}
+          {/* ACCOUNT NOTICE */}
           <div className="pt-2">
             <span className="inline-flex items-center gap-2 text-xs text-emerald-200/80 bg-black/30 border border-emerald-500/20 rounded-full px-4 py-1.5 backdrop-blur-md">
               <span className="text-amber-300 font-bold font-mono">Notice:</span>
-              <span>Guests enjoy full read-only analytics &amp; maps. Registering unlocks persistent cloud saves and custom bookmarks.</span>
+              <span>
+                Guests enjoy full read-only analytics &amp; maps. Registering unlocks persistent cloud saves and custom bookmarks.
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* FULL-WIDTH FEATURED CASE STUDIES RIBBON */}
+        <div className="absolute bottom-0 left-1/2 z-30 w-screen -translate-x-1/2 overflow-hidden border-t-[3px] border-t-orange-500 border-b-[3px] border-b-emerald-500 bg-[#171A19] shadow-[0_-8px_30px_rgba(0,0,0,0.25)]">
+
+          {/* RIBBON LABEL */}
+          <div className="absolute left-0 top-0 bottom-0 z-20 hidden sm:flex items-center border-r border-orange-500/40 bg-[#202523] px-5">
+            <span className="whitespace-nowrap font-mono text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
+              <span className="mr-2 text-orange-400">✦</span>
+              Featured Research
             </span>
           </div>
 
-          {/* Quick Guided Benchmarks Glass Capsule */}
-          <div className="pt-6 max-w-4xl mx-auto">
-            <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-[#06211b]/80 p-5 shadow-2xl shadow-emerald-950/40 backdrop-blur-2xl text-left">
-              <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500" />
-              <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-2 font-mono">
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
-                  Featured Case Studies:
-                </span>
-                {/* Links removed - not redirecting users from the ribbon */}
+          {/* MOVING HEADLINES */}
+          <div className="featured-ribbon-track flex w-max items-center py-3 sm:pl-48">
+            {[0, 1].map((copy) => (
+              <div
+                key={copy}
+                className="flex shrink-0 items-center"
+                aria-hidden={copy === 1}
+              >
+                {[
+                  "CLIMATE CHANGE",
+                  "✦",
+                  "VEGETATION DYNAMICS",
+                  "✦",
+                  "PRECIPITATION TRENDS",
+                  "✦",
+                  "ARCTIC SEA ICE",
+                  "✦",
+                  "DEFORESTATION",
+                  "✦",
+                  "DROUGHT MONITORING",
+                  "✦",
+                  "LAND SURFACE TEMPERATURE",
+                  "✦",
+                  "HYDROLOGICAL CHANGE",
+                  "✦",
+                  "EXTREME WEATHER",
+                  "✦",
+                  "EARTH SYSTEM ANALYTICS",
+                  "✦",
+                ].map((item, index) => (
+                  <span
+                    key={`${copy}-${index}`}
+                    className={
+                      item === "✦"
+                        ? "mx-5 text-sm text-orange-400"
+                        : "whitespace-nowrap text-[11px] font-bold tracking-[0.16em] text-[#D5E4DC] sm:text-xs"
+                    }
+                  >
+                    {item}
+                  </span>
+                ))}
               </div>
-
-              <LiveBenchmarkCards />
-            </div>
+            ))}
           </div>
         </div>
       </section>
+
 
       {/* =========================================================================
           BODY SECTIONS: CLEAN WHITE NEOMORPHISM & GLASSMORPHISM (User Requested)
