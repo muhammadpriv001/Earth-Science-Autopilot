@@ -1,9 +1,9 @@
 # The Earth Science Autopilot
-<a href="https://earth-science-autopilot.vercel.app/">Live Application Link</a>
 
 <div align="center">
 
 **ASK THE EARTH — Search. Investigate. Discover.**
+<a href="https://earth-science-autopilot.vercel.app/">Live Application Link</a>
 
 *NASA Space Apps Challenge 2026: Be An Earth System Trend Detective!*
 
