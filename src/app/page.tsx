@@ -109,10 +109,10 @@ export default function LandingPage() {
         </div>
 
         {/* FULL-WIDTH FEATURED CASE STUDIES RIBBON */}
-        <div className="absolute bottom-0 left-1/2 z-30 w-screen -translate-x-1/2 overflow-hidden border-t-[3px] border-t-orange-500 border-b-[3px] border-b-emerald-500 bg-[#171A19] shadow-[0_-8px_30px_rgba(0,0,0,0.25)]">
+        <div className="absolute bottom-0 left-1/2 z-30 w-screen -translate-x-1/2 overflow-hidden bg-[#303030] border-t-[3px] border-t-orange-500 border-b-[3px] border-b-emerald-500 shadow-lg">
 
           {/* RIBBON LABEL */}
-          <div className="absolute left-0 top-0 bottom-0 z-20 hidden sm:flex items-center border-r border-orange-500/40 bg-[#202523] px-5">
+          <div className="absolute left-0 top-0 bottom-0 z-20 hidden sm:flex items-center border-r border-orange-500/40 bg-[#303030] px-5">
             <span className="whitespace-nowrap font-mono text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
               <span className="mr-2 text-orange-400">✦</span>
               Featured Research
