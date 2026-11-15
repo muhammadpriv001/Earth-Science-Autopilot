@@ -3,7 +3,10 @@
 <div align="center">
 
 **ASK THE EARTH — Search. Investigate. Discover.**
-<a href="https://earth-science-autopilot.vercel.app/">Live Application Link</a>
+
+<p>
+  <a href="https://earth-science-autopilot.vercel.app/">Live Application Link</a>
+</p>
 
 *NASA Space Apps Challenge 2026: Be An Earth System Trend Detective!*
 
