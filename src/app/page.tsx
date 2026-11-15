@@ -57,7 +57,7 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-cyan-500/15 via-indigo-500/10 to-transparent blur-3xl opacity-75" />
 
         {/* CONTENT LAYER OVER GLOBE */}
-        <div className="relative z-10 max-w-5xl mx-auto space-y-15">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-7">
           {/* Main Title Heading directly on top of the Parallax Globe */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] drop-shadow-lg">
             ASK THE EARTH
@@ -111,15 +111,13 @@ export default function LandingPage() {
           {/* Quick Guided Benchmarks Glass Capsule */}
           <div className="pt-6 max-w-4xl mx-auto">
             <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-[#06211b]/80 p-5 shadow-2xl shadow-emerald-950/40 backdrop-blur-2xl text-left">
-              <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-orange-400" />
+              <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500" />
               <div className="flex items-center justify-between mb-3 px-1">
                 <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-2 font-mono">
                   <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
-                  NASA Challenge Guided Case Studies:
+                  Featured Case Studies:
                 </span>
-                <Link href="/auth/sign-in" className="text-xs font-bold text-emerald-400 hover:underline">
-                  Open in Portal →
-                </Link>
+                {/* Links removed - not redirecting users from the ribbon */}
               </div>
 
               <LiveBenchmarkCards />

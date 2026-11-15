@@ -14,12 +14,15 @@ body {
 
 /* Hide scrollbars globally across all browsers while retaining scroll functionality */
 * {
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important;
+  /* Firefox */
+  -ms-overflow-style: none !important;
+  /* IE and Edge */
 }
 
 *::-webkit-scrollbar {
-  display: none !important; /* Chrome, Safari, Opera */
+  display: none !important;
+  /* Chrome, Safari, Opera */
   width: 0 !important;
   height: 0 !important;
 }
@@ -59,15 +62,19 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes bounce-slow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-6px);
   }
@@ -85,4 +92,30 @@ body {
 .dark-tiles,
 .leaflet-tile.dark-tiles {
   filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%) !important;
+}
+
+.featured-ribbon-track {
+  width: max-content;
+  animation: earth-ribbon-scroll 42s linear infinite;
+  will-change: transform;
+}
+
+.featured-ribbon-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes earth-ribbon-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-ribbon-track {
+    animation: none;
+  }
 }
